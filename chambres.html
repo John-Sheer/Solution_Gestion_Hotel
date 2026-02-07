@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chambres - Hotel Le Prince</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="navbar-brand">
+                <div class="logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
+                    </svg>
+                </div>
+                <h1>Hotel Le Prince</h1>
+            </a>
+            <button class="menu-toggle" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+            <ul class="navbar-menu" id="navMenu">
+                <li><a href="index.html">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M2.25 12l8.955-8.955a1.125 1.125 0 0 1 1.59 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                        </svg>
+                        Accueil
+                    </a></li>
+                <li><a href="chambres.html" class="active">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m1.5.5l-1.5-.5M6.75 7.364V3h-3v18m3-13.636l10.5-3.819" />
+                        </svg>
+                        Chambres
+                    </a></li>
+                <li><a href="boissons.html">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 1-6.23.693L5 15.5m14.8-.2l.447 2.578a1.125 1.125 0 0 1-1.147 1.306H4.9a1.125 1.125 0 0 1-1.147-1.306l.478-2.778" />
+                        </svg>
+                        Bar
+                    </a></li>
+                <li><a href="login.html">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                        </svg>
+                        Espace Pro
+                    </a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <div class="container">
+            <h1>Nos Chambres</h1>
+            <p>Choisissez votre hébergement idéal</p>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label>Type :</label>
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" onclick="filterRooms('all')">Toutes</button>
+                        <button class="filter-tab" onclick="filterRooms('ventilated')">Ventilées</button>
+                        <button class="filter-tab" onclick="filterRooms('air_conditioned')">Climatisées</button>
+                        <button class="filter-tab" onclick="filterRooms('apartment')">Appartements</button>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label>Disponibilité :</label>
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" onclick="filterStatus('all')">Toutes</button>
+                        <button class="filter-tab" onclick="filterStatus('available')">Disponibles</button>
+                    </div>
+                </div>
+            </div>
+            <div class="rooms-grid" id="roomsGrid"></div>
+        </div>
+    </main>
+
+    <!-- Modal de réservation -->
+    <div class="modal-overlay" id="reservationModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Demande de Réservation</h3>
+                <button class="cart-close" onclick="closeModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="reservationForm" onsubmit="submitReservation(event)">
+                <div class="modal-body">
+                    <div style="background: var(--bg-surface); border-radius: 8px; padding: 14px; margin-bottom: 18px;">
+                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 4px;">Chambre
+                            sélectionnée</p>
+                        <p style="color: var(--brand-navy); font-size: 1rem; font-weight: 600; margin-bottom: 4px;">
+                            <span id="modalRoomName"></span>
+                        </p>
+                        <p style="color: var(--brand-navy); font-weight: 600; margin-bottom: 0;"><span
+                                id="modalRoomPrice"></span> / nuit</p>
+                        <input type="hidden" id="selectedRoomId">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nom complet *</label>
+                        <input type="text" class="form-input" id="guestName" required placeholder="Votre nom">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Téléphone *</label>
+                        <input type="tel" class="form-input" id="guestPhone" required placeholder="+225 00 00 00 00">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Arrivée *</label>
+                            <input type="date" class="form-input" id="checkIn" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Départ *</label>
+                            <input type="date" class="form-input" id="checkOut" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nombre de personnes</label>
+                        <select class="form-select" id="guestCount">
+                            <option value="1">1 personne</option>
+                            <option value="2" selected>2 personnes</option>
+                            <option value="3">3 personnes</option>
+                            <option value="4">4 personnes</option>
+                        </select>
+                    </div>
+                    <div style="background: #dbeafe; border-radius: 8px; padding: 14px;">
+                        <p style="color: #1e40af; margin-bottom: 4px; font-size: 0.85rem;">Total estimé</p>
+                        <p style="font-size: 1.25rem; font-weight: 700; color: #1e40af; margin-bottom: 0;"><span
+                                id="totalPrice">0 FCFA</span></p>
+                        <p style="font-size: 0.8rem; color: #1e40af; margin-bottom: 0;">(<span id="nightCount">0</span>
+                            nuit(s))</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Envoyer la demande</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>© 2026 Hotel Le Prince. Tous droits réservés.</p>
+                <p><a href="#" id="sheerLink">Propulsé par <span style="color:var(--brand-gold); font-weight:600;">Sheer
+                            Tech™</span></a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="storage.js"></script>
+    <script src="chambres.js"></script>
+</body>
+
+</html>
