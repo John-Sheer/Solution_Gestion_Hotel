@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réservation - Hotel Le Prince</title>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        nav h1 {
+            font-size: 24px;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+        
+        nav a:hover {
+            opacity: 0.8;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        
+        .hero h2 {
+            font-size: 42px;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+        
+        .hero p {
+            font-size: 18px;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        section {
+            margin-bottom: 80px;
+        }
+        
+        h3 {
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: #333;
+            text-align: center;
+        }
+        
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 80px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <h1>🏨 Hotel Le Prince</h1>
+            <ul>
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="chambres.html">Chambres</a></li>
+                <li><a href="reservation.html">Réserver</a></li>
+                <li><a href="avis.html">Avis</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <h2>Réservez votre séjour</h2>
+        <p>Profitez d'un confort exceptionnel et d'un service de qualité au cœur de Lomé</p>
+    </div>
+
+    <!-- Formulaire de Réservation -->
+    <section class="container">
+        <h3>Formulaire de Réservation</h3>
+        
+        <form id="reservationForm" class="form-container">
+            <!-- Informations personnelles -->
+            <h4 style="margin-bottom: 20px;">Vos informations</h4>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nom">Nom *</label>
+                    <input type="text" id="nom" name="nom" required minlength="2">
+                </div>
+                
+                <div class="form-group">
+                    <label for="prenom">Prénom *</label>
+                    <input type="text" id="prenom" name="prenom" required minlength="2">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="telephone">Téléphone *</label>
+                    <input type="tel" id="telephone" name="telephone" required placeholder="+228 90 00 00 00">
+                </div>
+            </div>
+            
+            <!-- Détails de réservation -->
+            <h4 style="margin: 30px 0 20px;">Détails de votre séjour</h4>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="dateArrivee">Date d'arrivée *</label>
+                    <input type="date" id="dateArrivee" name="dateArrivee" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dateDepart">Date de départ *</label>
+                    <input type="date" id="dateDepart" name="dateDepart" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="typeChbre">Type de chambre *</label>
+                    <select id="typeChbre" name="typeChbre" required>
+                        <option value="">Choisir une chambre...</option>
+                        <option value="simple">Chambre Simple - 15,000 FCFA/nuit</option>
+                        <option value="double">Chambre Double - 25,000 FCFA/nuit</option>
+                        <option value="familiale">Chambre Familiale - 35,000 FCFA/nuit</option>
+                        <option value="suite">Suite - 50,000 FCFA/nuit</option>
+                        <option value="presidentielle">Suite Présidentielle - 75,000 FCFA/nuit</option>
+                        <option value="penthouse">Penthouse - 100,000 FCFA/nuit</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nombrePersonnes">Nombre de personnes *</label>
+                    <input type="number" id="nombrePersonnes" name="nombrePersonnes" 
+                           required min="1" max="6" value="2">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="besoinsSpeciaux">Besoins spéciaux (optionnel)</label>
+                <textarea id="besoinsSpeciaux" name="besoinsSpeciaux" 
+                          placeholder="Exemple : Chambre non-fumeur, lit bébé, allergies alimentaires..."></textarea>
+            </div>
+            
+            <!-- Estimation de prix -->
+            <div id="priceEstimate"></div>
+            
+            <!-- Bouton de soumission -->
+            <button type="submit" id="submitReservation" class="btn-submit">
+                <span>📅</span>
+                Réserver maintenant
+            </button>
+        </form>
+    </section>
+
+    <!-- Galerie de photos -->
+    <section class="container">
+        <h3>Nos Chambres</h3>
+        
+        <div class="image-gallery">
+            <div class="gallery-item" 
+                 data-full-src="https://images.unsplash.com/photo-1590490360182-c33d57733427?w=1200"
+                 data-caption="Chambre Double de Luxe">
+                <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?w=600&h=400&fit=crop" 
+                     alt="Chambre Double">
+            </div>
+            
+            <div class="gallery-item" 
+                 data-full-src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1200"
+                 data-caption="Suite Présidentielle">
+                <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600&h=400&fit=crop" 
+                     alt="Suite">
+            </div>
+            
+            <div class="gallery-item" 
+                 data-full-src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=1200"
+                 data-caption="Salle de Bain Moderne">
+                <img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600&h=400&fit=crop" 
+                     alt="Salle de bain">
+            </div>
+            
+            <div class="gallery-item" 
+                 data-full-src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200"
+                 data-caption="Chambre Familiale">
+                <img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&h=400&fit=crop" 
+                     alt="Chambre familiale">
+            </div>
+        </div>
+    </section>
+
+    <!-- Google Maps -->
+    <section class="container">
+        <h3>Notre Emplacement</h3>
+        <div id="hotelMap"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Hotel Le Prince. Tous droits réservés.</p>
+        <p>📍 Lomé, Togo | 📞 +228 00 00 00 00 | ✉️ <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d8bbb7b6acb9bbac98b0b7acbdb4b4bda8aab1b6bbbdf6acbf">[email&#160;protected]</a></p>
+    </footer>
+
+    <!-- Scripts -->
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></s
