@@ -124,12 +124,13 @@ function renderStats() {
 }
 
 function renderReservations() {
-    const reservations = getReservations().filter(r => r.status === 'active');
+    const reservations = getReservations().filter(r => ['requested', 'active', 'checked_in'].includes(r.status));
     const tbody = document.getElementById('reservationsTable');
     const isOwner = currentUser && currentUser.role === 'owner';
+    document.getElementById('pendingReservationsCount').textContent = `${reservations.filter(r => r.status === 'requested').length} à confirmer`;
 
     if (reservations.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${isOwner ? 4 : 5}" style="text-align: center; padding: 24px; color: var(--text-secondary);">Aucune réservation en cours</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${isOwner ? 4 : 5}" style="text-align: center; padding: 24px; color: var(--text-secondary);">Aucune demande ou réservation en cours</td></tr>`;
         return;
     }
 
@@ -143,14 +144,14 @@ function renderReservations() {
             </td>
             <td>${room ? room.number : 'N/A'}</td>
             <td>${formatShortDate(res.checkIn)} → ${formatShortDate(res.checkOut)}</td>
-            <td><span class="badge badge-info">${getStatusLabel(res.status)}</span></td>
+            <td><span class="badge ${res.status === 'requested' ? 'badge-warning' : res.status === 'checked_in' ? 'badge-success' : 'badge-info'}">${getStatusLabel(res.status)}</span></td>
             ${!isOwner ? `
             <td>
-                <button class="btn btn-sm btn-success" onclick="doCheckout(${res.id})" title="Check-out">
+                ${res.status === 'requested' ? `<button class="btn btn-sm btn-success" onclick="doConfirmReservation(${res.id})" title="Confirmer la demande">Confirmer</button>` : res.status === 'active' ? `<button class="btn btn-sm btn-success" onclick="doCheckin(${res.id})" title="Enregistrer l’arrivée">Check-in</button>` : `<button class="btn btn-sm btn-success" onclick="doCheckout(${res.id})" title="Enregistrer le départ">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="16" height="16">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                     </svg>
-                </button>
+                </button>`}
                 <button class="btn btn-sm btn-danger" onclick="doCancelReservation(${res.id})" title="Annuler">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="16" height="16">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -209,7 +210,7 @@ function renderOrders() {
 function renderRooms() {
     const rooms = getRooms();
     const tbody = document.getElementById('roomsTable');
-    const isOwner = currentUser && currentUser.role === 'owner';
+    const canUpdateRoomStatus = canPerformAction('update_room_status');
 
     tbody.innerHTML = rooms.map(room => `
         <tr>
@@ -222,7 +223,7 @@ function renderRooms() {
                     ${getStatusLabel(room.status)}
                 </span>
             </td>
-            ${isOwner ? `
+            ${canUpdateRoomStatus ? `
             <td>
                 <select onchange="doChangeRoomStatus(${room.id}, this.value)" class="form-select" style="padding: 6px 10px; font-size: 0.8rem; width: auto;">
                     <option value="available" ${room.status === 'available' ? 'selected' : ''}>Disponible</option>
@@ -236,10 +237,10 @@ function renderRooms() {
 }
 
 function renderStock() {
-    const beverages = getBeverages().filter(b => b.stock < 30);
+    const beverages = getBeverages().filter(b => b.stock < 20);
     const tbody = document.getElementById('stockTable');
 
-    document.getElementById('lowStockCount').textContent = `${beverages.filter(b => b.stock < 20).length} alertes`;
+    document.getElementById('lowStockCount').textContent = `${beverages.length} alertes`;
 
     if (beverages.length === 0) {
         tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 24px; color: var(--text-secondary);">Tous les stocks sont suffisants</td></tr>`;
@@ -300,6 +301,39 @@ function doCheckout(reservationId) {
     }
 }
 
+function doCheckin(reservationId) {
+    if (!canPerformAction('checkin')) {
+        alert('Action non autorisée');
+        return;
+    }
+
+    const reservation = checkInReservation(reservationId);
+    if (!reservation) {
+        alert('Le check-in est impossible : vérifiez les dates et la disponibilité de la chambre.');
+        return;
+    }
+
+    logAction('CHECKIN', `Check-in réservation #${reservationId}`);
+    renderAll();
+}
+
+function doConfirmReservation(reservationId) {
+    if (!canPerformAction('confirm_reservation')) {
+        alert('Action non autorisée');
+        return;
+    }
+
+    const reservation = confirmReservation(reservationId);
+    if (!reservation) {
+        alert('Impossible de confirmer : la chambre est déjà réservée ou indisponible pour ces dates.');
+        renderAll();
+        return;
+    }
+
+    logAction('RESERVATION_CONFIRM', `Réservation #${reservationId} confirmée`);
+    renderAll();
+}
+
 function doCancelReservation(reservationId) {
     if (!canPerformAction('cancel_reservation')) {
         alert('Action non autorisée');
@@ -340,6 +374,7 @@ function doCancelOrder(orderId) {
 function doChangeRoomStatus(roomId, status) {
     if (!canPerformAction('update_room_status')) {
         alert('Action non autorisée');
+        renderAll();
         return;
     }
 

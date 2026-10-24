@@ -375,7 +375,7 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #007bff, #0056b3);
+  background: #007bff;
   color: white;
   display: flex;
   align-items: center;
@@ -562,7 +562,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.5) 100%);
+  background: rgba(0, 0, 0, 0.5);
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: 1;

@@ -18,7 +18,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e2e8f0 100%);
+            background: var(--bg-surface);
             padding: 20px;
         }
 
@@ -50,7 +50,7 @@
             right: -50%;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            display: none;
         }
 
         .login-visual h1 {
@@ -177,10 +177,7 @@
             align-items: center;
             justify-content: center;
             padding: 40px 20px;
-            background:
-                radial-gradient(900px 500px at 10% 0%, rgba(16, 42, 70, 0.14), transparent 60%),
-                radial-gradient(800px 500px at 100% 100%, rgba(23, 61, 92, 0.1), transparent 60%),
-                var(--bg-page);
+            background: var(--bg-page);
         }
 
         .login-container {
@@ -196,7 +193,7 @@
         }
 
         .login-visual {
-            background: linear-gradient(150deg, #071a2b, #0f3351);
+            background: var(--brand-navy);
             padding: 64px 56px;
             display: flex;
             flex-direction: column;
@@ -214,7 +211,7 @@
             bottom: -180px;
             width: 420px;
             height: 420px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.12), transparent 65%);
+            display: none;
         }
 
         .login-visual::after {
@@ -394,10 +391,7 @@
     </style>
     <style>
         .login-page {
-            background:
-                radial-gradient(900px 520px at 10% 0%, rgba(16, 42, 70, 0.08), transparent 60%),
-                radial-gradient(800px 500px at 100% 100%, rgba(16, 42, 70, 0.05), transparent 60%),
-                var(--bg-page);
+            background: var(--bg-page);
         }
 
         .login-container {
@@ -406,11 +400,7 @@
         }
 
         .login-visual {
-            background: linear-gradient(150deg, #071a2b, #0f3351);
-        }
-
-        .login-visual::before {
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 65%);
+            background: var(--brand-navy);
         }
 
         .login-visual::after {

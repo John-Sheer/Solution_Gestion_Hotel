@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bar - Hotel carefour des retrouvailles | Tél : +22893848781 / 72334367</title>
+    <title>Bar - Hôtel Carrefour des Retrouvailles | Tél. : +228 93 84 87 81</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -27,7 +27,7 @@
                 </div>
                 <h1>Hôtel</h1>
             </a>
-            <button class="menu-toggle" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+            <button class="menu-toggle" onclick="toggleMenu()" aria-controls="navMenu" aria-expanded="false" aria-label="Ouvrir le menu de navigation"><span></span><span></span><span></span></button>
             <ul class="navbar-menu" id="navMenu">
                 <li><a href="index.html">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -53,22 +53,6 @@
                         </svg>
                         Services
                     </a></li>
-                <li><a href="boissons.html" class="active" style="display:none !important;">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 1-6.23.693L5 15.5m14.8-.2l.447 2.578a1.125 1.125 0 0 1-1.147 1.306H4.9a1.125 1.125 0 0 1-1.147-1.306l.478-2.778" />
-                        </svg>
-                        Bar
-                    </a></li>
-                <li><a href="login.html">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                        </svg>
-                        Espace Pro
-                    </a></li>
             </ul>
         </div>
     </nav>
@@ -76,7 +60,7 @@
     <header class="page-header">
         <div class="container">
             <h1>Notre Bar</h1>
-            <p>Bières locales, sucreries et eau minérale</p>
+            <p>Bières locales, boissons sans alcool et eau minérale</p>
         </div>
     </header>
 
@@ -88,7 +72,7 @@
                     <div class="filter-tabs">
                         <button class="filter-tab active" onclick="filterCategory('all')">Toutes</button>
                         <button class="filter-tab" onclick="filterCategory('beer')">Bières</button>
-                        <button class="filter-tab" onclick="filterCategory('soda')">Sucreries</button>
+                        <button class="filter-tab" onclick="filterCategory('soda')">Boissons sans alcool</button>
                         <button class="filter-tab" onclick="filterCategory('water')">Eau</button>
                     </div>
                 </div>
@@ -189,6 +173,7 @@
 
     <script src="js/storage.js"></script>
     <script src="js/boissons.js"></script>
+    <script src="js/navigation.js"></script>
 </body>
 
 </html>

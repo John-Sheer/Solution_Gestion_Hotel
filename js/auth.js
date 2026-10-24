@@ -7,7 +7,7 @@ const USERS_KEY = 'hotel_users';
 const ACTIONS_LOG_KEY = 'hotel_actions';
 
 // Utilisateurs par défaut
-// Rôles: owner (propriétaire, lecture seule), hotel_manager (gérant hôtel, tout), bar_manager (gérant bar, boissons seulement)
+// Rôles : owner (propriétaire, lecture seule), hotel_manager (gérant hôtel), bar_manager (gérant bar)
 const defaultUsers = [
     {
         id: 1,
@@ -103,13 +103,13 @@ function canPerformAction(action) {
     // Définition des permissions par rôle
     const permissions = {
         // Propriétaire: lecture seule + modification statut chambres
-        owner: ['view_stats', 'view_rooms', 'view_reservations', 'view_orders', 'update_room_status'],
+        owner: ['view_stats', 'view_rooms', 'view_reservations'],
 
         // Gérant Hôtel: accès complet (chambres + bar)
         hotel_manager: [
             'view_stats', 'view_rooms', 'view_reservations', 'view_orders',
-            'create_reservation', 'cancel_reservation', 'checkout',
-            'create_order', 'validate_order', 'cancel_order',
+            'create_reservation', 'confirm_reservation', 'cancel_reservation', 'checkin', 'checkout',
+            'create_order', 'validate_order', 'cancel_order', 'update_room_status',
             'restock'
         ],
 
@@ -196,6 +196,8 @@ function getActionTypeLabel(type) {
         'LOGIN': 'Connexion',
         'LOGOUT': 'Déconnexion',
         'RESERVATION_CREATE': 'Réservation créée',
+        'RESERVATION_CONFIRM': 'Réservation confirmée',
+        'CHECKIN': 'Arrivée enregistrée',
         'RESERVATION_CANCEL': 'Réservation annulée',
         'CHECKOUT': 'Check-out',
         'ORDER_CREATE': 'Commande créée',

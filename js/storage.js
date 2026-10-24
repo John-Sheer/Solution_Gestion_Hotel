@@ -17,7 +17,7 @@ const ROOM_IMAGES = {
     apartment: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=900&h=700&q=80'
 };
 
-// Images pour les boissons (catégories disponibles: bière, sucreries, eau)
+// Images pour les boissons (catégories disponibles : bière, boissons sans alcool, eau)
 const BEVERAGE_IMAGES = {
     beer: 'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=400&h=400&fit=crop',
     soda: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&h=400&fit=crop',
@@ -27,7 +27,7 @@ const BEVERAGE_IMAGES = {
 // Données initiales des chambres
 const INITIAL_ROOMS = [
     { id: 1, number: '101', name: 'Chambre Ventilée', type: 'ventilated', price: 15000, capacity: 2, features: ['Wi-Fi', 'TV', 'Ventilateur'], status: 'available', image: ROOM_IMAGES.ventilated },
-    { id: 2, number: '102', name: 'Chambre Ventilée', type: 'ventilated', price: 15000, capacity: 2, features: ['Wi-Fi', 'TV', 'Ventilateur'], status: 'occupied', image: ROOM_IMAGES.ventilated },
+    { id: 2, number: '102', name: 'Chambre Ventilée', type: 'ventilated', price: 15000, capacity: 2, features: ['Wi-Fi', 'TV', 'Ventilateur'], status: 'available', image: ROOM_IMAGES.ventilated },
     { id: 3, number: '103', name: 'Chambre Ventilée', type: 'ventilated', price: 15000, capacity: 2, features: ['Wi-Fi', 'TV', 'Ventilateur'], status: 'available', image: ROOM_IMAGES.ventilated },
     { id: 4, number: '201', name: 'Chambre Climatisée', type: 'air_conditioned', price: 35000, capacity: 2, features: ['Wi-Fi', 'TV', 'Climatisation', 'Mini-bar'], status: 'available', image: ROOM_IMAGES.air_conditioned },
     { id: 5, number: '202', name: 'Chambre Climatisée', type: 'air_conditioned', price: 35000, capacity: 2, features: ['Wi-Fi', 'TV', 'Climatisation', 'Mini-bar'], status: 'available', image: ROOM_IMAGES.air_conditioned },
@@ -35,7 +35,7 @@ const INITIAL_ROOMS = [
 ];
 
 // Données initiales des boissons - Bar (Togo)
-// Uniquement: Bières, Sucreries, Eau
+// Uniquement : bières, boissons sans alcool et eau
 const INITIAL_BEVERAGES = [
     // === BIÈRES (BB LOMÉ & SNB TOGO) ===
     // BB LOMÉ
@@ -50,7 +50,7 @@ const INITIAL_BEVERAGES = [
     { id: 18, name: 'Djama 228', category: 'beer', price: 900, description: 'Bière forte SNB Togo (33cl)', image: 'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=400&h=400&fit=crop', stock: 80 },
     { id: 19, name: 'Djama Stout', category: 'beer', price: 1000, description: 'Bière noire SNB Togo (33cl)', image: 'https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&h=400&fit=crop', stock: 70 },
 
-    // === SUCRERIES (Sodas) ===
+    // === BOISSONS SANS ALCOOL ===
     { id: 7, name: 'Coca-Cola', category: 'soda', price: 500, description: 'Soda classique (33cl)', image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&h=400&fit=crop', stock: 150 },
     { id: 8, name: 'Fanta Orange', category: 'soda', price: 500, description: 'Fanta orange pétillante (33cl)', image: 'https://images.unsplash.com/photo-1594971475674-6a97f8fe8c2b?w=400&h=400&fit=crop', stock: 120 },
     { id: 9, name: 'Sprite', category: 'soda', price: 500, description: 'Soda citron-lime (33cl)', image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&h=400&fit=crop', stock: 100 },
@@ -64,13 +64,9 @@ const INITIAL_BEVERAGES = [
     { id: 15, name: 'Evian Grand', category: 'water', price: 1000, description: 'Eau minérale Evian (1L)', image: 'https://images.unsplash.com/photo-1564419320461-6870880221ad?w=400&h=400&fit=crop', stock: 150 }
 ];
 
-const INITIAL_RESERVATIONS = [
-    { id: 1, roomId: 2, guestName: 'Kouassi Yao', guestPhone: '+225 07 00 00 00', checkIn: '2026-02-07', checkOut: '2026-02-10', guests: 2, totalPrice: 45000, status: 'active', createdAt: '2026-02-05T10:00:00Z', createdBy: { name: 'Marie Koné', role: 'staff' } }
-];
-
-const INITIAL_ORDERS = [
-    { id: 1, items: [{ beverageId: 2, name: 'Castel Beer', quantity: 2, price: 800 }, { beverageId: 9, name: 'Sprite', quantity: 2, price: 500 }], roomNumber: '102', totalPrice: 2600, status: 'completed', createdAt: '2026-02-07T08:30:00Z', createdBy: { name: 'Jean Touré', role: 'staff' } }
-];
+// Les données de démonstration obsolètes étaient datées de février 2026.
+const INITIAL_RESERVATIONS = [];
+const INITIAL_ORDERS = [];
 
 function getData(key) {
     const data = localStorage.getItem(key);
@@ -138,27 +134,83 @@ function getReservations() {
 function getReservationById(id) { return getReservations().find(res => res.id === id); }
 
 function addReservation(reservation, user = null) {
+    const room = getRoomById(reservation.roomId);
+    if (!room || !isRoomAvailableForDates(room.id, reservation.checkIn, reservation.checkOut)) return null;
+
     const reservations = getReservations();
     const newId = reservations.length > 0 ? Math.max(...reservations.map(r => r.id)) + 1 : 1;
     const newRes = {
         ...reservation,
+        status: reservation.status || 'requested',
         id: newId,
         createdAt: new Date().toISOString(),
         createdBy: user ? { name: user.name, role: user.role } : { name: 'Client', role: 'guest' }
     };
     reservations.push(newRes);
     setData(STORAGE_KEYS.RESERVATIONS, reservations);
-    updateRoom(reservation.roomId, { status: 'occupied' });
     return newRes;
+}
+
+function isRoomAvailableForDates(roomId, checkIn, checkOut, excludeReservationId = null) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(checkIn) || !/^\d{4}-\d{2}-\d{2}$/.test(checkOut) || checkOut <= checkIn) return false;
+    if (getLocalDateString(new Date(`${checkIn}T00:00:00`)) !== checkIn || getLocalDateString(new Date(`${checkOut}T00:00:00`)) !== checkOut) return false;
+
+    const room = getRoomById(roomId);
+    if (!room || room.status === 'maintenance') return false;
+
+    const today = getLocalDateString(new Date());
+    if (room.status === 'occupied' && checkIn <= today && checkOut > today) return false;
+
+    return !getReservations().some(reservation =>
+        reservation.roomId === roomId &&
+        reservation.id !== excludeReservationId &&
+        ['requested', 'active', 'checked_in'].includes(reservation.status) &&
+        checkIn < reservation.checkOut && checkOut > reservation.checkIn
+    );
+}
+
+function getAvailableRoomsForDates(checkIn, checkOut) {
+    return getRooms().filter(room => isRoomAvailableForDates(room.id, checkIn, checkOut));
+}
+
+function getLocalDateString(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function confirmReservation(id) {
+    const reservations = getReservations();
+    const reservation = reservations.find(item => item.id === id && item.status === 'requested');
+    if (!reservation || reservation.checkIn < getLocalDateString(new Date()) || !isRoomAvailableForDates(reservation.roomId, reservation.checkIn, reservation.checkOut, id)) return null;
+    reservation.status = 'active';
+    setData(STORAGE_KEYS.RESERVATIONS, reservations);
+    return reservation;
+}
+
+function checkInReservation(id) {
+    const reservations = getReservations();
+    const reservation = reservations.find(item => item.id === id && item.status === 'active');
+    const today = getLocalDateString(new Date());
+    const room = reservation && getRoomById(reservation.roomId);
+    if (!reservation || reservation.checkIn > today || reservation.checkOut <= today || !room || room.status !== 'available' || !isRoomAvailableForDates(reservation.roomId, reservation.checkIn, reservation.checkOut, id)) return null;
+    reservation.status = 'checked_in';
+    setData(STORAGE_KEYS.RESERVATIONS, reservations);
+    updateRoom(reservation.roomId, { status: 'occupied' });
+    return reservation;
 }
 
 function cancelReservation(id) {
     const reservations = getReservations();
-    const res = reservations.find(r => r.id === id);
+    const res = reservations.find(r => r.id === id && ['requested', 'active', 'checked_in'].includes(r.status));
     if (res) {
         res.status = 'cancelled';
         setData(STORAGE_KEYS.RESERVATIONS, reservations);
-        updateRoom(res.roomId, { status: 'available' });
+        const room = getRoomById(res.roomId);
+        if (res.checkIn <= getLocalDateString(new Date()) && res.checkOut > getLocalDateString(new Date()) && room && room.status === 'occupied') {
+            updateRoom(res.roomId, { status: 'available' });
+        }
         return true;
     }
     return false;
@@ -166,11 +218,12 @@ function cancelReservation(id) {
 
 function completeReservation(id) {
     const reservations = getReservations();
-    const res = reservations.find(r => r.id === id);
+    const res = reservations.find(r => r.id === id && r.status === 'checked_in');
     if (res) {
         res.status = 'completed';
         setData(STORAGE_KEYS.RESERVATIONS, reservations);
-        updateRoom(res.roomId, { status: 'available' });
+        const room = getRoomById(res.roomId);
+        if (room && room.status === 'occupied') updateRoom(res.roomId, { status: 'available' });
         return true;
     }
     return false;
@@ -312,13 +365,13 @@ function getStats() {
         rooms: {
             total: rooms.length,
             occupied,
-            available: rooms.filter(r => r.status === 'available').length,
+            available: getAvailableRoomsForDates(getLocalDateString(new Date()), getLocalDateString(new Date(Date.now() + 86400000))).length,
             maintenance: rooms.filter(r => r.status === 'maintenance').length,
             occupancyRate: rooms.length > 0 ? Math.round((occupied / rooms.length) * 100) : 0
         },
         reservations: {
             total: reservations.length,
-            active: reservations.filter(r => r.status === 'active').length,
+            active: reservations.filter(r => ['active', 'checked_in'].includes(r.status)).length,
             revenue: reservations.filter(r => r.status === 'active' || r.status === 'completed').reduce((s, r) => s + r.totalPrice, 0)
         },
         orders: {
@@ -340,6 +393,8 @@ const STATUS_LABELS = {
     occupied: 'Occupée',
     maintenance: 'Indisponible',
     active: 'Active',
+    requested: 'À confirmer',
+    checked_in: 'En séjour',
     pending: 'En attente',
     completed: 'Terminée',
     cancelled: 'Annulée'
@@ -353,7 +408,7 @@ const TYPE_LABELS = {
 
 const CATEGORY_LABELS = {
     beer: 'Bière',
-    soda: 'Soda',
+    soda: 'Boisson sans alcool',
     water: 'Eau',
     spirit: 'Spiritueux'
 };
@@ -383,8 +438,30 @@ function initializeData() {
         setData(STORAGE_KEYS.BEVERAGES, INITIAL_BEVERAGES);
     }
 
-    if (!getData(STORAGE_KEYS.RESERVATIONS)) setData(STORAGE_KEYS.RESERVATIONS, INITIAL_RESERVATIONS);
-    if (!getData(STORAGE_KEYS.ORDERS)) setData(STORAGE_KEYS.ORDERS, INITIAL_ORDERS);
+    const reservations = getData(STORAGE_KEYS.RESERVATIONS);
+    if (!reservations) {
+        setData(STORAGE_KEYS.RESERVATIONS, INITIAL_RESERVATIONS);
+    } else {
+        const cleanedReservations = reservations.filter(reservation =>
+            !(reservation.id === 1 && reservation.guestName === 'Kouassi Yao' && reservation.createdAt === '2026-02-05T10:00:00Z')
+        );
+        if (cleanedReservations.length !== reservations.length) {
+            setData(STORAGE_KEYS.RESERVATIONS, cleanedReservations);
+            const rooms = getRooms();
+            const demoRoom = rooms.find(room => room.id === 2);
+            if (demoRoom && demoRoom.status === 'occupied') updateRoom(demoRoom.id, { status: 'available' });
+        }
+    }
+
+    const orders = getData(STORAGE_KEYS.ORDERS);
+    if (!orders) {
+        setData(STORAGE_KEYS.ORDERS, INITIAL_ORDERS);
+    } else {
+        const cleanedOrders = orders.filter(order =>
+            !(order.id === 1 && order.roomNumber === '102' && order.createdAt === '2026-02-07T08:30:00Z')
+        );
+        if (cleanedOrders.length !== orders.length) setData(STORAGE_KEYS.ORDERS, cleanedOrders);
+    }
     if (!getData(STORAGE_KEYS.CART)) setData(STORAGE_KEYS.CART, []);
 }
 

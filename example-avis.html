@@ -3,319 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avis Clients - Hotel carefour des retrouvailles | Tél : +22893848781 / 72334367</title>
+    <title>Avis clients - Hôtel Carrefour des Retrouvailles | Tél. : +228 93 84 87 81</title>
     
-    <!-- Styles -->
     <link rel="stylesheet" href="styles.css">
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: #f8f9fa;
-        }
-        
-        header {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
-            padding: 20px 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-        }
-        
-        nav h1 {
-            font-size: 24px;
-        }
-        
-        nav ul {
-            display: flex;
-            list-style: none;
-            gap: 30px;
-        }
-        
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: opacity 0.3s;
-        }
-        
-        nav a:hover {
-            opacity: 0.8;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        
-        .hero {
-            text-align: center;
-            padding: 60px 20px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        }
-        
-        .hero h2 {
-            font-size: 42px;
-            margin-bottom: 20px;
-            color: #007bff;
-        }
-        
-        .hero p {
-            font-size: 18px;
-            color: #666;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        section {
-            margin-bottom: 60px;
-        }
-        
-        h3 {
-            font-size: 32px;
-            margin-bottom: 30px;
-            color: #333;
-            text-align: center;
-        }
-        
-        .reviews-grid {
-            display: grid;
-            gap: 20px;
-        }
-        
-        .cta-section {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
-            padding: 60px 20px;
-            text-align: center;
-            border-radius: 12px;
-            margin-top: 60px;
-        }
-        
-        .cta-section h3 {
-            color: white;
-            margin-bottom: 20px;
-        }
-        
-        .cta-section p {
-            font-size: 18px;
-            margin-bottom: 30px;
-        }
-        
-        .btn-cta {
-            display: inline-block;
-            padding: 15px 40px;
-            background: white;
-            color: #007bff;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-cta:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-        }
-        
-        footer {
-            background: #2c3e50;
-            color: white;
-            text-align: center;
-            padding: 30px 20px;
-            margin-top: 80px;
-        }
-    </style>
+    <link rel="stylesheet" href="css/styles-modules.css">
+    <link rel="stylesheet" href="css/reviews-page.css">
 </head>
-<body>
-    <!-- Header -->
-    <header>
-        <nav>
-            <h1>🏨 Hôtel</h1>
-            <ul>
+<body class="reviews-page">
+    <header class="reviews-header">
+        <nav class="reviews-nav reviews-container" aria-label="Navigation principale">
+            <a class="reviews-nav__brand" href="index.html">Hôtel</a>
+            <ul class="reviews-nav__links">
                 <li><a href="index.html">Accueil</a></li>
                 <li><a href="chambres.html">Chambres</a></li>
-                <li><a href="reservation.html">Réserver</a></li>
-                <li><a href="avis.html">Avis</a></li>
-                <li><a href="contact.html">Contact</a></li>
+                <li><a href="example-avis.html" aria-current="page">Avis</a></li>
             </ul>
         </nav>
     </header>
 
-    <!-- Hero Section -->
-    <div class="hero">
-        <h2>Ce que disent nos clients</h2>
-        <p>Découvrez les expériences de nos clients et partagez la vôtre</p>
-    </div>
+    <main class="reviews-container">
+        <section class="reviews-cta" aria-labelledby="reviewsCtaTitle">
+            <h2 class="reviews-cta__title" id="reviewsCtaTitle">Prêt à vivre l'expérience ?</h2>
+            <p class="reviews-cta__description">Réservez dès maintenant et profitez d'un séjour inoubliable.</p>
+            <a href="chambres.html" class="reviews-cta__button">Voir les chambres</a>
+        </section>
+    </main>
 
-    <!-- Section Statistiques -->
-    <section class="container">
-        <div id="reviewStats"></div>
-    </section>
-
-    <!-- Section Avis -->
-    <section class="container">
-        <h3>Avis récents</h3>
-        <div class="reviews-grid" id="reviewsContainer">
-            <!-- Les avis seront chargés ici automatiquement par reviews.js -->
-        </div>
-        
-        <!-- Pagination -->
-        <div id="reviewsPagination"></div>
-    </section>
-
-    <!-- Formulaire pour soumettre un avis -->
-    <section class="container">
-        <h3>Partagez votre expérience</h3>
-        
-        <form id="reviewForm" class="form-container">
-            <div class="form-group">
-                <label for="nom">Votre nom *</label>
-                <input type="text" id="nom" name="nom" required minlength="2">
-            </div>
-            
-            <div class="form-group">
-                <label for="email">Votre email *</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            
-            <div class="form-group">
-                <label>Votre note globale *</label>
-                <div class="star-rating">
-                    <input type="radio" id="star5" name="note" value="5" required>
-                    <label for="star5">⭐</label>
-                    <input type="radio" id="star4" name="note" value="4">
-                    <label for="star4">⭐</label>
-                    <input type="radio" id="star3" name="note" value="3">
-                    <label for="star3">⭐</label>
-                    <input type="radio" id="star2" name="note" value="2">
-                    <label for="star2">⭐</label>
-                    <input type="radio" id="star1" name="note" value="1">
-                    <label for="star1">⭐</label>
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="notesProprete">Propreté *</label>
-                    <select id="notesProprete" name="notesProprete" required>
-                        <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
-                        <option value="4">⭐⭐⭐⭐ Très bien</option>
-                        <option value="3">⭐⭐⭐ Bien</option>
-                        <option value="2">⭐⭐ Moyen</option>
-                        <option value="1">⭐ Médiocre</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="notesService">Service *</label>
-                    <select id="notesService" name="notesService" required>
-                        <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
-                        <option value="4">⭐⭐⭐⭐ Très bien</option>
-                        <option value="3">⭐⭐⭐ Bien</option>
-                        <option value="2">⭐⭐ Moyen</option>
-                        <option value="1">⭐ Médiocre</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="notesConfort">Confort *</label>
-                    <select id="notesConfort" name="notesConfort" required>
-                        <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
-                        <option value="4">⭐⭐⭐⭐ Très bien</option>
-                        <option value="3">⭐⭐⭐ Bien</option>
-                        <option value="2">⭐⭐ Moyen</option>
-                        <option value="1">⭐ Médiocre</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="notesEmplacement">Emplacement *</label>
-                    <select id="notesEmplacement" name="notesEmplacement" required>
-                        <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
-                        <option value="4">⭐⭐⭐⭐ Très bien</option>
-                        <option value="3">⭐⭐⭐ Bien</option>
-                        <option value="2">⭐⭐ Moyen</option>
-                        <option value="1">⭐ Médiocre</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="typeChbre">Type de chambre séjournée</label>
-                <select id="typeChbre" name="typeChbre">
-                    <option value="">Sélectionner...</option>
-                    <option value="simple">Chambre Simple</option>
-                    <option value="double">Chambre Double</option>
-                    <option value="familiale">Chambre Familiale</option>
-                    <option value="suite">Suite</option>
-                    <option value="presidentielle">Suite Présidentielle</option>
-                    <option value="penthouse">Penthouse</option>
-                    <option value="autre">Autre</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="titre">Titre de votre avis *</label>
-                <input type="text" id="titre" name="titre" required minlength="5" 
-                       placeholder="Exemple: Excellent séjour en famille">
-            </div>
-            
-            <div class="form-group">
-                <label for="commentaire">Votre commentaire *</label>
-                <textarea id="commentaire" name="commentaire" required minlength="10"
-                          placeholder="Partagez les détails de votre expérience..."></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label for="dateSejour">Date de votre séjour</label>
-                <input type="date" id="dateSejour" name="dateSejour">
-            </div>
-            
-            <button type="submit" class="btn-submit">
-                <span>✍️</span>
-                Envoyer mon avis
-            </button>
-            
-            <p style="text-align: center; margin-top: 15px; color: #666; font-size: 14px;">
-                Votre avis sera publié après validation par notre équipe.
-            </p>
-        </form>
-    </section>
-
-    <!-- CTA Section -->
-    <div class="container">
-        <div class="cta-section">
-            <h3>Prêt à vivre l'expérience ?</h3>
-            <p>Réservez dès maintenant et profitez d'un séjour inoubliable</p>
-            <a href="reservation.html" class="btn-cta">Réserver maintenant</a>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2026 Hôtel. Tous droits réservés.</p>
-        <p>📍 Lomé, Togo | 📞 +228 00 00 00 00 | ✉️ <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="eb8884859f8a889fab83849f8e87878e9b998285888ec59f8c">[email&#160;protected]</a></p>
+    <footer class="reviews-footer">
+        <p>&copy; 2026 Hôtel Carrefour des Retrouvailles. Tous droits réservés.</p>
+        <p>📍 Tchaloudè, Kara, Togo | 📞 <a href="tel:+22893848781">+228 93 84 87 81</a> / <a href="tel:+22872334367">+228 72 33 43 67</a></p>
     </footer>
 
-    <!-- Scripts -->
-    <script data-cfas
+</body>
+</html>

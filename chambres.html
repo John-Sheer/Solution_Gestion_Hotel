@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chambres - Hotel carefour des retrouvailles | Tél : +22893848781 / 72334367</title>
+    <title>Chambres - Hôtel Carrefour des Retrouvailles | Tél. : +228 93 84 87 81</title>
     <meta name="description"
         content="Chambres ventilées, climatisées et appartement familial. Réservez directement, sans frais supplémentaires.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,15 +35,13 @@
                 </div>
                 <h1>Hôtel</h1>
             </a>
-            <button class="menu-toggle" onclick="toggleMenu()">
+            <button class="menu-toggle" onclick="toggleMenu()" aria-controls="navMenu" aria-expanded="false" aria-label="Ouvrir le menu de navigation">
                 <span></span><span></span><span></span>
             </button>
             <ul class="navbar-menu" id="navMenu">
                 <li><a href="index.html">Accueil</a></li>
                 <li><a href="chambres.html" class="active">Chambres</a></li>
                 <li><a href="index.html#services">Services</a></li>
-                <li><a href="boissons.html" style="display:none !important;">Bar</a></li>
-                <li><a href="login.html">Espace Pro</a></li>
             </ul>
         </div>
     </nav>
@@ -51,7 +49,7 @@
     <header class="page-header rooms-header">
         <div class="container">
             <h1>Choisissez votre chambre</h1>
-            <p><span id="availableRooms">5</span> chambres disponibles aujourd'hui · Réservation par téléphone</p>
+            <p><span id="availableRooms">0</span> chambres disponibles aujourd'hui · Demande de réservation en ligne</p>
         </div>
     </header>
 
@@ -77,7 +75,7 @@
             </div>
             <div class="rooms-grid" id="roomsGrid"></div>
             <p class="section-note">Besoin d'aide pour choisir ? Appelez la réception au
-                <a href="tel:+22800000000">+228 00 00 00 00</a>.
+                <a href="tel:+22893848781">+228 93 84 87 81</a>.
             </p>
         </div>
     </main>
@@ -95,52 +93,47 @@
             </div>
             <form id="reservationForm" onsubmit="submitReservation(event)">
                 <div class="modal-body">
-                    <div style="background: var(--bg-surface); border-radius: 8px; padding: 14px; margin-bottom: 18px;">
-                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 4px;">Chambre
-                            sélectionnée</p>
-                        <p style="color: var(--brand-navy); font-size: 1rem; font-weight: 600; margin-bottom: 4px;">
+                    <div class="reservation-room-summary">
+                        <p class="reservation-summary-label">Chambre sélectionnée</p>
+                        <p class="reservation-room-name">
                             <span id="modalRoomName"></span>
                         </p>
-                        <p style="color: var(--brand-navy); font-weight: 600; margin-bottom: 0;"><span
-                                id="modalRoomPrice"></span> / nuit</p>
+                        <p class="reservation-room-price"><span id="modalRoomPrice"></span> / nuit</p>
                         <input type="hidden" id="selectedRoomId">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Nom complet *</label>
+                        <label class="form-label" for="guestName">Nom complet *</label>
                         <input type="text" class="form-input" id="guestName" required placeholder="Votre nom">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Téléphone *</label>
-                        <input type="tel" class="form-input" id="guestPhone" required placeholder="+228 00 00 00 00">
+                        <label class="form-label" for="guestPhone">Téléphone *</label>
+                        <input type="tel" class="form-input" id="guestPhone" required autocomplete="tel">
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Arrivée *</label>
+                            <label class="form-label" for="checkIn">Arrivée *</label>
                             <input type="date" class="form-input" id="checkIn" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Départ *</label>
+                            <label class="form-label" for="checkOut">Départ *</label>
                             <input type="date" class="form-input" id="checkOut" required>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Nombre de personnes</label>
+                        <label class="form-label" for="guestCount">Nombre de personnes</label>
                         <select class="form-select" id="guestCount">
                             <option value="1">1 personne</option>
                             <option value="2" selected>2 personnes</option>
                             <option value="3">3 personnes</option>
                             <option value="4">4 personnes</option>
+                            <option value="5">5 personnes</option>
+                            <option value="6">6 personnes</option>
                         </select>
                     </div>
-                    <div
-                        style="background: var(--bg-surface); border: 1px solid rgba(16, 42, 70, 0.12); border-radius: 8px; padding: 14px;">
-                        <p style="color: var(--text-secondary); margin-bottom: 4px; font-size: 0.85rem;">Total estimé
-                        </p>
-                        <p
-                            style="font-family: var(--font-serif); font-size: 1.5rem; font-weight: 600; color: var(--brand-navy); margin-bottom: 0;">
-                            <span id="totalPrice">0 FCFA</span></p>
-                        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0;">(<span
-                                id="nightCount">0</span> nuit(s))</p>
+                    <div class="reservation-total">
+                        <p class="reservation-summary-label">Total estimé</p>
+                        <p class="reservation-total-price"><span id="totalPrice">0 FCFA</span></p>
+                        <p class="reservation-total-nights">(<span id="nightCount">0</span> nuit(s))</p>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -156,7 +149,7 @@
             <div class="footer-content">
                 <div class="footer-brand">
                     <h3>Hotel carefour des retrouvailles</h3>
-                    <p>Tél : +22893848781 / 72334367</p>
+                    <p>Tél. : +228 93 84 87 81 / +228 72 33 43 67</p>
                     <p class="footer-note">Réception ouverte 24h/24</p>
                 </div>
                 <div class="footer-links">
@@ -165,15 +158,14 @@
                         <li><a href="index.html">Accueil</a></li>
                         <li><a href="chambres.html">Chambres</a></li>
                         <li><a href="index.html#services">Services</a></li>
-                        <li><a href="boissons.html" style="display:none !important;">Bar</a></li>
                         <li><a href="login.html">Espace Pro</a></li>
                     </ul>
                 </div>
                 <div class="footer-links">
                     <h4>Contact</h4>
                     <ul>
-                        <li>Lomé, Togo</li>
-                        <li><a href="tel:+22893848781">+228 93 84 87 81</a> / <a href="tel:+22872334367">72 33 43 67</a></li>
+                        <li>Tchaloudè, Kara, Togo</li>
+                        <li><a href="tel:+22893848781">+228 93 84 87 81</a> / <a href="tel:+22872334367">+228 72 33 43 67</a></li>
                     </ul>
                 </div>
             </div>
@@ -183,6 +175,7 @@
             </div>
         </div>
     </footer>
+    <script src="js/navigation.js"></script>
 </body>
 
 </html>

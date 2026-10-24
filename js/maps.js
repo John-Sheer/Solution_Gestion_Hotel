@@ -80,7 +80,7 @@ class HotelMap {
       content: `
         <div style="padding: 10px; font-family: Arial, sans-serif;">
           <h3 style="margin: 0 0 10px 0; color: #007bff;">Hôtel</h3>
-          <p style="margin: 5px 0;"><strong>📍 Adresse:</strong> Lomé, Togo</p>
+          <p style="margin: 5px 0;"><strong>📍 Adresse:</strong> Tchaloudè, Kara, Togo</p>
           <p style="margin: 5px 0;"><strong>📞 Téléphone:</strong> +228 00 00 00 00</p>
           <p style="margin: 5px 0;"><strong>✉️ Email:</strong> contact@hotel.tg</p>
           <a href="https://www.google.com/maps/dir/?api=1&destination=${this.hotelLocation.lat},${this.hotelLocation.lng}" 
@@ -281,7 +281,7 @@ class HotelMap {
       ">
         <div>
           <p style="font-size: 18px; margin-bottom: 10px;">📍 Hôtel</p>
-          <p>Lomé, Togo</p>
+          <p>Tchaloudè, Kara, Togo</p>
           <a href="https://www.google.com/maps/search/?api=1&query=${this.hotelLocation.lat},${this.hotelLocation.lng}" 
              target="_blank"
              style="

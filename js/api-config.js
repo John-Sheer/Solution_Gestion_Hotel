@@ -16,8 +16,8 @@ const API_CONFIG = {
 
   // Coordonnées de l’hôtel
   HOTEL_COORDINATES: {
-    lat: 6.1319,
-    lng: 1.2220
+    lat: 9.5662457,
+    lng: 1.1965787
   }
 };
 

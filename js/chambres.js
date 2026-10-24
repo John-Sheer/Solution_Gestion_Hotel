@@ -12,7 +12,9 @@ function toggleMenu() {
 function renderRooms() {
     const rooms = getRooms();
     const grid = document.getElementById('roomsGrid');
-    const availableCount = rooms.filter(room => room.status === 'available').length;
+    const today = getLocalDateString(new Date());
+    const tomorrow = getLocalDateString(new Date(Date.now() + 86400000));
+    const availableCount = getAvailableRoomsForDates(today, tomorrow).length;
 
     ['heroAvailable', 'availableRooms'].forEach(id => {
         const element = document.getElementById(id);
@@ -57,14 +59,14 @@ function renderRooms() {
                     ${room.features.slice(0, 4).map(f => `<span class="room-feature">${f}</span>`).join('')}
                 </div>
                 ${room.status === 'available' ? `
-                    <button class="btn btn-primary" onclick="openReservationModal(${room.id})" style="width: 100%;">
+                    <button class="btn btn-primary" onclick="openReservationModal(${room.id})">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                         </svg>
                         Réserver cette chambre
                     </button>
                 ` : `
-                    <button class="btn btn-secondary" disabled style="width: 100%;">
+                    <button class="btn btn-secondary" disabled>
                         ${room.status === 'occupied' ? 'Occupée' : 'Indisponible'}
                     </button>
                 `}
@@ -106,10 +108,15 @@ function openReservationModal(roomId) {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    document.getElementById('checkIn').value = today.toISOString().split('T')[0];
-    document.getElementById('checkIn').min = today.toISOString().split('T')[0];
-    document.getElementById('checkOut').value = tomorrow.toISOString().split('T')[0];
-    document.getElementById('checkOut').min = tomorrow.toISOString().split('T')[0];
+    document.getElementById('checkIn').value = getLocalDateString(today);
+    document.getElementById('checkIn').min = getLocalDateString(today);
+    document.getElementById('checkOut').value = getLocalDateString(tomorrow);
+    document.getElementById('checkOut').min = getLocalDateString(tomorrow);
+
+    document.querySelectorAll('#guestCount option').forEach(option => {
+        option.disabled = Number(option.value) > room.capacity;
+    });
+    document.getElementById('guestCount').value = Math.min(2, room.capacity);
 
     calculateTotal();
 
@@ -129,7 +136,7 @@ function calculateTotal() {
     const checkIn = new Date(document.getElementById('checkIn').value);
     const checkOut = new Date(document.getElementById('checkOut').value);
 
-    if (checkIn && checkOut && checkOut > checkIn) {
+    if (!Number.isNaN(checkIn.getTime()) && !Number.isNaN(checkOut.getTime()) && checkOut > checkIn) {
         const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
         const total = nights * room.price;
 
@@ -146,6 +153,23 @@ function submitReservation(event) {
 
     const checkIn = new Date(document.getElementById('checkIn').value);
     const checkOut = new Date(document.getElementById('checkOut').value);
+    const guests = parseInt(document.getElementById('guestCount').value, 10);
+    const checkInValue = document.getElementById('checkIn').value;
+    const checkOutValue = document.getElementById('checkOut').value;
+
+    if (!room || !checkInValue || !checkOutValue || checkOut <= checkIn) {
+        alert('Veuillez sélectionner des dates de séjour valides.');
+        return;
+    }
+    if (guests > room.capacity) {
+        alert(`Cette chambre peut accueillir au maximum ${room.capacity} personne(s).`);
+        return;
+    }
+    if (!isRoomAvailableForDates(roomId, checkInValue, checkOutValue)) {
+        alert('Cette chambre n’est pas disponible pour ces dates. Choisissez une autre période ou une autre chambre.');
+        return;
+    }
+
     const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
 
     const reservation = {
@@ -154,18 +178,22 @@ function submitReservation(event) {
         guestPhone: document.getElementById('guestPhone').value,
         checkIn: document.getElementById('checkIn').value,
         checkOut: document.getElementById('checkOut').value,
-        guests: parseInt(document.getElementById('guestCount').value),
+        guests,
         totalPrice: nights * room.price,
-        status: 'active'
+        status: 'requested'
     };
 
     // For client reservations, mark as pending (will be confirmed by staff)
-    addReservation(reservation, null);
+    const createdReservation = addReservation(reservation, null);
+    if (!createdReservation) {
+        alert('Cette chambre vient d’être demandée pour ces dates. Veuillez réessayer avec une autre période.');
+        return;
+    }
 
     closeModal();
     renderRooms();
 
-    alert('Votre demande de réservation a été envoyée! Un membre du personnel vous contactera pour confirmation.');
+    alert('Votre demande de réservation a été envoyée. Elle reste à confirmer par notre équipe.');
 }
 
 // Event listeners
@@ -176,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const checkIn = new Date(this.value);
         const nextDay = new Date(checkIn);
         nextDay.setDate(nextDay.getDate() + 1);
-        document.getElementById('checkOut').min = nextDay.toISOString().split('T')[0];
+        document.getElementById('checkOut').min = getLocalDateString(nextDay);
         calculateTotal();
     });
 
