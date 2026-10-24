@@ -1,5 +1,5 @@
 /**
- * Module de Réservation - Hotel Le Prince
+ * Module de Réservation - Hôtel
  * Gère le formulaire de réservation et l'envoi à l'API
  */
 

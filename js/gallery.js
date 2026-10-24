@@ -1,5 +1,5 @@
 /**
- * Galerie d'images Interactive - Hotel Le Prince
+ * Galerie d'images Interactive - Hôtel
  * Lightbox avec navigation, zoom et diaporama
  */
 

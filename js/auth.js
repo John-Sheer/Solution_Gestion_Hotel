@@ -1,10 +1,10 @@
 // ===========================================
-// HOTEL LE PRINCE - Module d'Authentification
+// Module d'Authentification
 // ===========================================
 
-const AUTH_KEY = 'hotel_prince_auth';
-const USERS_KEY = 'hotel_prince_users';
-const ACTIONS_LOG_KEY = 'hotel_prince_actions';
+const AUTH_KEY = 'hotel_auth';
+const USERS_KEY = 'hotel_users';
+const ACTIONS_LOG_KEY = 'hotel_actions';
 
 // Utilisateurs par défaut
 // Rôles: owner (propriétaire, lecture seule), hotel_manager (gérant hôtel, tout), bar_manager (gérant bar, boissons seulement)
@@ -12,9 +12,9 @@ const defaultUsers = [
     {
         id: 1,
         username: 'proprietaire',
-        password: 'prince2026',
+        password: 'admin2026',
         role: 'owner',
-        name: 'M. Le Prince',
+        name: 'Administrateur',
         createdAt: new Date().toISOString()
     },
     {

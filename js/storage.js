@@ -1,27 +1,27 @@
 // ===========================================
-// HOTEL LE PRINCE - Module de Stockage
+// Module de Stockage
 // ===========================================
 
 const STORAGE_KEYS = {
-    ROOMS: 'hotel_prince_rooms',
-    RESERVATIONS: 'hotel_prince_reservations',
-    BEVERAGES: 'hotel_prince_beverages',
-    ORDERS: 'hotel_prince_orders',
-    CART: 'hotel_prince_cart'
+    ROOMS: 'hotel_rooms',
+    RESERVATIONS: 'hotel_reservations',
+    BEVERAGES: 'hotel_beverages',
+    ORDERS: 'hotel_orders',
+    CART: 'hotel_cart'
 };
 
 // Images placeholder pour les chambres
 const ROOM_IMAGES = {
-    ventilated: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&h=300&fit=crop',
-    air_conditioned: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=400&h=300&fit=crop',
-    apartment: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400&h=300&fit=crop'
+    ventilated: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=900&h=700&q=80',
+    air_conditioned: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&w=900&h=700&q=80',
+    apartment: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=900&h=700&q=80'
 };
 
 // Images pour les boissons (catégories disponibles: bière, sucreries, eau)
 const BEVERAGE_IMAGES = {
-    beer: 'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=200&h=200&fit=crop',
-    soda: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=200&h=200&fit=crop',
-    water: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=200&h=200&fit=crop'
+    beer: 'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=400&h=400&fit=crop',
+    soda: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&h=400&fit=crop',
+    water: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&h=400&fit=crop'
 };
 
 // Données initiales des chambres
@@ -34,34 +34,34 @@ const INITIAL_ROOMS = [
     { id: 6, number: 'A01', name: 'Appartement Meublé', type: 'apartment', price: 75000, capacity: 6, features: ['Wi-Fi', 'TV', 'Climatisation', 'Cuisine équipée', 'Salon', 'Jacuzzi'], status: 'available', image: ROOM_IMAGES.apartment }
 ];
 
-// Données initiales des boissons - Bar Hotel Le Prince (Togo)
+// Données initiales des boissons - Bar (Togo)
 // Uniquement: Bières, Sucreries, Eau
 const INITIAL_BEVERAGES = [
     // === BIÈRES (BB LOMÉ & SNB TOGO) ===
     // BB LOMÉ
-    { id: 1, name: 'PILS BB', category: 'beer', price: 800, description: 'La bière du pays - Brassée par BB Lomé (65cl)', image: 'https://images.unsplash.com/photo-1571767499270-13ee3f059914?w=400&h=400&fit=crop', stock: 100 },
-    { id: 2, name: 'Castel Beer', category: 'beer', price: 800, description: 'Lager BB Lomé (33cl)', image: 'https://images.unsplash.com/photo-1618885472179-5e474019f2a4?w=400&h=400&fit=crop', stock: 100 },
-    { id: 3, name: 'Awooyo', category: 'beer', price: 1000, description: 'Bière brune BB Lomé (33cl)', image: 'https://images.unsplash.com/photo-1594611813914-2231267863bc?w=400&h=400&fit=crop', stock: 80 },
-    { id: 4, name: 'Guinness Foreign Extra', category: 'beer', price: 1200, description: 'Stout BB Lomé (33cl)', image: 'https://images.unsplash.com/photo-1563234853-294025a743a4?w=400&h=400&fit=crop', stock: 60 },
-    { id: 5, name: 'Beaufort Lager', category: 'beer', price: 800, description: 'Premium BB Lomé (33cl)', image: 'https://images.unsplash.com/photo-1532635042-a6f6bd4709ed?w=400&h=400&fit=crop', stock: 80 },
+    { id: 1, name: 'PILS BB', category: 'beer', price: 800, description: 'La bière du pays - Brassée par BB Lomé (65cl)', image: 'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=400&h=400&fit=crop', stock: 100 },
+    { id: 2, name: 'Castel Beer', category: 'beer', price: 800, description: 'Lager BB Lomé (33cl)', image: 'https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&h=400&fit=crop', stock: 100 },
+    { id: 3, name: 'Awooyo', category: 'beer', price: 1000, description: 'Bière brune BB Lomé (33cl)', image: 'https://images.unsplash.com/photo-1436076863939-06870fe779c2?w=400&h=400&fit=crop', stock: 80 },
+    { id: 4, name: 'Guinness Foreign Extra', category: 'beer', price: 1200, description: 'Stout BB Lomé (33cl)', image: 'https://images.unsplash.com/photo-1568644396922-5c3bfae12521?w=400&h=400&fit=crop', stock: 60 },
+    { id: 5, name: 'Beaufort Lager', category: 'beer', price: 800, description: 'Premium BB Lomé (33cl)', image: 'https://images.unsplash.com/photo-1571613316887-6f8d5cbf7ef7?w=400&h=400&fit=crop', stock: 80 },
     // SNB TOGO
-    { id: 16, name: 'Djama Pilsner', category: 'beer', price: 800, description: 'Bière blonde - Brassée par SNB Togo (33cl)', image: 'https://images.unsplash.com/photo-1532250937813-8877bc970ec7?w=400&h=400&fit=crop', stock: 90 },
-    { id: 17, name: 'Djama Lager', category: 'beer', price: 700, description: 'Légère SNB Togo (33cl)', image: 'https://images.unsplash.com/photo-1613580556276-80f6f4065608?w=400&h=400&fit=crop', stock: 100 },
-    { id: 18, name: 'Djama 228', category: 'beer', price: 900, description: 'Bière forte SNB Togo (33cl)', image: 'https://images.unsplash.com/photo-1566633806327-047f617651a1?w=400&h=400&fit=crop', stock: 80 },
-    { id: 19, name: 'Djama Stout', category: 'beer', price: 1000, description: 'Bière noire SNB Togo (33cl)', image: 'https://images.unsplash.com/photo-1571587130232-a25612f004b5?w=400&h=400&fit=crop', stock: 70 },
+    { id: 16, name: 'Djama Pilsner', category: 'beer', price: 800, description: 'Bière blonde - Brassée par SNB Togo (33cl)', image: 'https://images.unsplash.com/photo-1584225064785-c62a8b43d148?w=400&h=400&fit=crop', stock: 90 },
+    { id: 17, name: 'Djama Lager', category: 'beer', price: 700, description: 'Légère SNB Togo (33cl)', image: 'https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?w=400&h=400&fit=crop', stock: 100 },
+    { id: 18, name: 'Djama 228', category: 'beer', price: 900, description: 'Bière forte SNB Togo (33cl)', image: 'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=400&h=400&fit=crop', stock: 80 },
+    { id: 19, name: 'Djama Stout', category: 'beer', price: 1000, description: 'Bière noire SNB Togo (33cl)', image: 'https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&h=400&fit=crop', stock: 70 },
 
     // === SUCRERIES (Sodas) ===
     { id: 7, name: 'Coca-Cola', category: 'soda', price: 500, description: 'Soda classique (33cl)', image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&h=400&fit=crop', stock: 150 },
-    { id: 8, name: 'Fanta Orange', category: 'soda', price: 500, description: 'Fanta orange pétillante (33cl)', image: 'https://images.unsplash.com/photo-1551024709-3f23ad6364d3?w=400&h=400&fit=crop', stock: 120 },
+    { id: 8, name: 'Fanta Orange', category: 'soda', price: 500, description: 'Fanta orange pétillante (33cl)', image: 'https://images.unsplash.com/photo-1594971475674-6a97f8fe8c2b?w=400&h=400&fit=crop', stock: 120 },
     { id: 9, name: 'Sprite', category: 'soda', price: 500, description: 'Soda citron-lime (33cl)', image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&h=400&fit=crop', stock: 100 },
-    { id: 10, name: 'Malta Guinness', category: 'soda', price: 600, description: 'Boisson maltée sans alcool (33cl)', image: 'https://images.unsplash.com/photo-1491223945956-6a98d30e3223?w=400&h=400&fit=crop', stock: 80 },
+    { id: 10, name: 'Malta Guinness', category: 'soda', price: 600, description: 'Boisson maltée sans alcool (33cl)', image: 'https://images.unsplash.com/photo-1624517452488-04869289c4ca?w=400&h=400&fit=crop', stock: 80 },
     { id: 11, name: 'Youki Cocktail', category: 'soda', price: 400, description: 'Cocktail de fruits local (33cl)', image: 'https://images.unsplash.com/photo-1556881286-fc6915169721?w=400&h=400&fit=crop', stock: 100 },
-    { id: 12, name: 'Youki Orange', category: 'soda', price: 400, description: 'Soda orange BB Lomé (33cl)', image: 'https://images.unsplash.com/photo-1543253332-9cb480fab77d?w=400&h=400&fit=crop', stock: 100 },
+    { id: 12, name: 'Youki Orange', category: 'soda', price: 400, description: 'Soda orange BB Lomé (33cl)', image: 'https://images.unsplash.com/photo-1581636625402-29b2a704ef13?w=400&h=400&fit=crop', stock: 100 },
     { id: 13, name: 'World Cola', category: 'soda', price: 400, description: 'Cola local BB Lomé (33cl)', image: 'https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=400&fit=crop', stock: 80 },
 
     // === EAU ===
-    { id: 14, name: 'Evian Petit', category: 'water', price: 500, description: 'Eau minérale Evian (50cl)', image: 'https://images.unsplash.com/photo-1551044439-0fc4a282f183?w=400&h=400&fit=crop', stock: 200 },
-    { id: 15, name: 'Evian Grand', category: 'water', price: 1000, description: 'Eau minérale Evian (1L)', image: 'https://images.unsplash.com/photo-1631553535233-0498305c6d3d?w=400&h=400&fit=crop', stock: 150 }
+    { id: 14, name: 'Evian Petit', category: 'water', price: 500, description: 'Eau minérale Evian (50cl)', image: 'https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400&h=400&fit=crop', stock: 200 },
+    { id: 15, name: 'Evian Grand', category: 'water', price: 1000, description: 'Eau minérale Evian (1L)', image: 'https://images.unsplash.com/photo-1564419320461-6870880221ad?w=400&h=400&fit=crop', stock: 150 }
 ];
 
 const INITIAL_RESERVATIONS = [
@@ -335,6 +335,33 @@ function getStats() {
 }
 
 // ============ UTILITAIRES ============
+const STATUS_LABELS = {
+    available: 'Disponible',
+    occupied: 'Occupée',
+    maintenance: 'Indisponible',
+    active: 'Active',
+    pending: 'En attente',
+    completed: 'Terminée',
+    cancelled: 'Annulée'
+};
+
+const TYPE_LABELS = {
+    ventilated: 'Ventilée',
+    air_conditioned: 'Climatisée',
+    apartment: 'Appartement'
+};
+
+const CATEGORY_LABELS = {
+    beer: 'Bière',
+    soda: 'Soda',
+    water: 'Eau',
+    spirit: 'Spiritueux'
+};
+
+function getStatusLabel(status) { return STATUS_LABELS[status] || status; }
+function getTypeLabel(type) { return TYPE_LABELS[type] || type; }
+function getCategoryLabel(category) { return CATEGORY_LABELS[category] || category; }
+
 function formatPrice(price) { return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA'; }
 function formatDate(d) { return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }); }
 function formatDateTime(d) { return new Date(d).toLocaleString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }

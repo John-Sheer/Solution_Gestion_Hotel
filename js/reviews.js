@@ -1,5 +1,5 @@
 /**
- * Module Avis Clients - Hotel Le Prince
+ * Module Avis Clients - Hôtel
  * Gère l'affichage et la soumission des avis
  */
 

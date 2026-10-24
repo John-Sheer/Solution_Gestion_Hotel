@@ -1,5 +1,5 @@
 /**
- * Module Animations - Hotel Le Prince
+ * Module Animations - Hôtel
  * Animations au scroll et transitions fluides
  */
 
@@ -124,7 +124,7 @@ class AnimationController {
   }
 
   setupParallax() {
-    const parallaxElements = document.querySelectorAll('.parallax, .hero-image');
+    const parallaxElements = document.querySelectorAll('.parallax');
     
     if (parallaxElements.length === 0) return;
 

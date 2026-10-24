@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hotel Le Prince - Bienvenue</title>
-    <meta name="description" content="Hotel Le Prince - Votre destination de confort et d'élégance">
+    <title>Hotel carefour des retrouvailles · Lomé | Tél : +22893848781 / 72334367</title>
+    <meta name="description"
+        content="Hôtel indépendant au cœur de Lomé : accueil 24h/24, bar sur place et réservation directe, sans frais supplémentaires.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -13,25 +14,39 @@
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="css/styles-modules.css">
-    <script src="js/api-config.js"></script>
 
     <!-- Scripts du site -->
     <script src="js/api-config.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/auth.js"></script>
-
-    <script src="js/admim.js"></script>
-    <script src="js/chambres.js"></script>
-    <script src="js/boissons.js"></script>
-
-    <script src="js/reservation.js"></script>
-    <script src="js/reviews.js"></script>
-    <script src="js/contact.js"></script>
-
-    <script src="js/gallery.js"></script>
-    <script src="js/maps.js"></script>
     <script src="js/animations.js"></script>
-
+    <script>
+        function updateHomeRooms() {
+            try {
+                var rooms = [];
+                if (typeof Rooms !== 'undefined' && Rooms.getAll) rooms = Rooms.getAll();
+                else if (typeof getRooms === 'function') rooms = getRooms();
+                else {
+                    try { rooms = JSON.parse(localStorage.getItem('hotel_rooms') || '[]'); } catch(e) {}
+                }
+                var avail = rooms.filter(function(r){ 
+                    var s = r.status || r.statut || r.state || '';
+                    return String(s).toLowerCase() === 'disponible'; 
+                }).length;
+                if (avail === 0) {
+                    avail = rooms.filter(function(r){ 
+                        var s = r.status || r.statut || r.state || '';
+                        return String(s).toLowerCase().indexOf('occup') === -1 && String(s).toLowerCase().indexOf('res') === -1;
+                    }).length;
+                }
+                var el = document.getElementById('homeAvailableRooms');
+                if (el) el.textContent = avail;
+            } catch(e) {}
+        }
+        document.addEventListener('DOMContentLoaded', updateHomeRooms);
+        window.addEventListener('storage', updateHomeRooms);
+        setTimeout(updateHomeRooms, 500);
+    </script>
 </head>
 
 <body>
@@ -46,44 +61,16 @@
                             d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
                     </svg>
                 </div>
-                <h1>Hotel Le Prince</h1>
+                <h1>Hôtel</h1>
             </a>
             <button class="menu-toggle" onclick="toggleMenu()">
                 <span></span><span></span><span></span>
             </button>
             <ul class="navbar-menu" id="navMenu">
-                <li><a href="index.html" class="active">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M2.25 12l8.955-8.955a1.125 1.125 0 0 1 1.59 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                        </svg>
-                        Accueil
-                    </a></li>
-                <li><a href="chambres.html">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m1.5.5l-1.5-.5M6.75 7.364V3h-3v18m3-13.636l10.5-3.819" />
-                        </svg>
-                        Chambres
-                    </a></li>
-                <li><a href="boissons.html">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 1-6.23.693L5 15.5m14.8-.2l.447 2.578a1.125 1.125 0 0 1-1.147 1.306H4.9a1.125 1.125 0 0 1-1.147-1.306l.478-2.778" />
-                        </svg>
-                        Bar
-                    </a></li>
-                <li><a href="login.html">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                        </svg>
-                        Espace Pro
-                    </a></li>
+                <li><a href="index.html" class="active">Accueil</a></li>
+                <li><a href="chambres.html">Chambres</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="login.html">Espace Pro</a></li>
             </ul>
         </div>
     </nav>
@@ -93,9 +80,9 @@
         <div class="container">
             <div class="hero-content">
                 <div class="hero-text">
-                    <h1>Bienvenue à l'Hotel Le Prince</h1>
-                    <p>Découvrez le confort et l'élégance au cœur de la ville. Chambres modernes, service impeccable et
-                        bar raffiné pour un séjour inoubliable.</p>
+                    <span class="hero-eyebrow">Hotel carefour des retrouvailles · Lomé</span>
+                    <h1>Votre séjour, <em>notre attention</em></h1>
+                    <p>Hotel carefour des retrouvailles. Tél : +22893848781 / 72334367</p>
                     <div class="hero-buttons">
                         <a href="chambres.html" class="btn btn-primary btn-lg">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -103,42 +90,46 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M2.25 12l8.954-8.955a1.125 1.125 0 0 1 1.592 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                             </svg>
-                            Voir nos Chambres
+                            Voir les chambres
                         </a>
-                        <a href="boissons.html" class="btn btn-outline btn-lg">
-                            Notre Bar
-                        </a>
+                        <a href="#services" class="btn btn-outline btn-lg">Découvrir les services</a>
+                    </div>
+                    <div class="hero-meta">
+                        <span>Wi-Fi gratuit</span>
+                        <span>Réception 24h/24</span>
+                        <span>Accueil 24h/24</span>
                     </div>
                 </div>
-                <div class="hero-image">
-                    <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=400&fit=crop"
-                        alt="Hotel Le Prince">
+                <div class="hero-visual">
+                    <div class="hero-image">
+                        <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1000&q=80"
+                            alt="Façade et piscine de l'hôtel">
+                    </div>
+                    <a href="chambres.html" class="hero-rating" style="text-decoration:none;">
+                        <span class="hero-rating-score" id="homeAvailableRooms">--</span>
+                        <div class="hero-rating-copy">
+                            <span>Chambres disponibles</span>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Services Section -->
-    <section class="services-section">
+    <section class="services-section" id="services">
         <div class="container">
-            <div class="section-header">
-                <span>Nos Services</span>
-                <h2>Tout pour votre confort</h2>
-            </div>
-            <div class="services-grid">
-                <div class="service-card">
-                    <div class="service-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m1.5.5l-1.5-.5M6.75 7.364V3h-3v18m3-13.636l10.5-3.819" />
-                        </svg>
-                    </div>
-                    <h3>Chambres Confortables</h3>
-                    <p>Des chambres climatisées avec Wi-Fi gratuit, TV écran plat et salle de bain privée.</p>
-                    <a href="chambres.html">Découvrir →</a>
+            <div class="services-layout">
+                <div class="services-intro">
+                    <span class="eyebrow">Nos services</span>
+                    <h2>Tout l'essentiel, sans superflu.</h2>
+                    <p>Un séjour fluide : un accueil disponible, un bar sur place et des espaces pensés pour se
+                        reposer.</p>
+                    <a href="chambres.html" class="btn btn-outline">Voir les chambres</a>
                 </div>
-                <div class="service-card">
+                <div class="services-list">
+                <article class="service-card" style="display:none !important;">
+                    <div class="service-index">03</div>
                     <div class="service-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor">
@@ -146,84 +137,59 @@
                                 d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 1-6.23.693L5 15.5m14.8-.2l.447 2.578a1.125 1.125 0 0 1-1.147 1.306H4.9a1.125 1.125 0 0 1-1.147-1.306l.478-2.778" />
                         </svg>
                     </div>
-                    <h3>Bar & Rafraîchissements</h3>
-                    <p>Large sélection de bières togolaises, sucreries et eau minérale. Service en chambre disponible.
-                    </p>
-                    <a href="boissons.html">Voir la carte →</a>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
-                        </svg>
+                    <div class="service-body">
+                        <h3>Bar sur place</h3>
+                        <p>Boissons fraîches, cocktails et ambiance conviviale.</p>
+                        <a href="chambres.html">Voir les chambres →</a>
                     </div>
-                    <h3>Sécurité 24h/24</h3>
-                    <p>Personnel de sécurité présent jour et nuit. Parking surveillé et coffre-fort dans les chambres.
-                    </p>
-                    <a href="#">En savoir plus →</a>
+                </article>
+                    <article class="service-card">
+                        <span class="service-index">02</span>
+                        <div class="service-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 1-6.23.693L5 15.5m14.8-.2l.447 2.578a1.125 1.125 0 0 1-1.147 1.306H4.9a1.125 1.125 0 0 1-1.147-1.306l.478-2.778" />
+                            </svg>
+                        </div>
+                        <div class="service-body">
+                            <h3>Bar & room service</h3>
+                            <p>Bières locales, sodas et eau minérale, à déguster au bar ou servis directement en chambre.
+                            </p>
+                        <a href="chambres.html">Voir les chambres →</a>
+                        </div>
+                    </article>
+                    <article class="service-card">
+                        <span class="service-index">03</span>
+                        <div class="service-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                            </svg>
+                        </div>
+                        <div class="service-body">
+                            <h3>Accueil & sécurité</h3>
+                            <p>Réception 24h/24, parking surveillé et coffre-fort. Une équipe joignable à tout moment.</p>
+                            <a href="tel:+22800000000">Nous appeler →</a>
+                        </div>
+                    </article>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Stats Section -->
-    <section class="section">
-        <div class="container">
-            <div class="stats-grid" id="homeStats">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m1.5.5l-1.5-.5M6.75 7.364V3h-3v18m3-13.636l10.5-3.819" />
-                        </svg>
-                    </div>
-                    <div class="stat-content">
-                        <h3 id="statRooms">6</h3>
-                        <p>Chambres</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                        </svg>
-                    </div>
-                    <div class="stat-content">
-                        <h3 id="statCapacity">16</h3>
-                        <p>Capacité totale</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 1-6.23.693L5 15.5m14.8-.2l.447 2.578a1.125 1.125 0 0 1-1.147 1.306H4.9a1.125 1.125 0 0 1-1.147-1.306l.478-2.778" />
-                        </svg>
-                    </div>
-                    <div class="stat-content">
-                        <h3 id="statBeverages">15</h3>
-                        <p>Boissons au bar</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
-                        </svg>
-                    </div>
-                    <div class="stat-content">
-                        <h3>4.8</h3>
-                        <p>Note clients</p>
-                    </div>
-                </div>
+    <!-- CTA Section -->
+    <section class="cta-band">
+        <div class="container cta-band-inner">
+            <div class="cta-band-copy">
+                <span class="cta-eyebrow">Réservation directe</span>
+                <h2>Une question avant de réserver ?</h2>
+                <p>Notre réception vous répond 24h/24, par téléphone ou sur place.</p>
+            </div>
+            <div class="cta-band-actions">
+                <a href="tel:+22800000000" class="btn btn-light">+228 00 00 00 00</a>
+                <a href="chambres.html" class="btn btn-outline-light">Choisir une chambre</a>
             </div>
         </div>
     </section>
@@ -233,16 +199,16 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <h3>Hotel Le Prince</h3>
-                    <p>Votre destination de confort et d'élégance. Service de qualité et chambres modernes pour un
-                        séjour inoubliable.</p>
+                    <h3>Hotel carefour des retrouvailles</h3>
+                    <p>Tél : +22893848781 / 72334367</p>
+                    <p class="footer-note">Réception ouverte 24h/24</p>
                 </div>
                 <div class="footer-links">
                     <h4>Navigation</h4>
                     <ul>
                         <li><a href="index.html">Accueil</a></li>
                         <li><a href="chambres.html">Chambres</a></li>
-                        <li><a href="boissons.html">Bar</a></li>
+                        <li><a href="#services">Services</a></li>
                         <li><a href="login.html">Espace Pro</a></li>
                     </ul>
                 </div>
@@ -250,32 +216,24 @@
                     <h4>Contact</h4>
                     <ul>
                         <li>Lomé, Togo</li>
-                        <li>+228 00 00 00 00</li>
-                        <li>contact@hotelleprince.tg</li>
+                        <li><a href="tel:+22893848781">+228 93 84 87 81</a> / <a href="tel:+22872334367">72 33 43 67</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>© 2026 Hotel Le Prince. Tous droits réservés.</p>
-                <p><a href="#" id="sheerLink">Propulsé par <span style="color:var(--brand-gold); font-weight:600;">Sheer
-                            Tech™</span></a></p>
+                <p>© 2026. Tous droits réservés.</p>
+                <p><a href="#" id="sheerLink">Propulsé par <span>Sheer Tech™</span></a></p>
             </div>
         </div>
     </footer>
 
-    <script src="js/storage.js"></script>
     <script>
         function toggleMenu() {
             document.getElementById('navMenu').classList.toggle('open');
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            const stats = getStats();
-            const rooms = getRooms();
             const beverages = getBeverages();
-
-            document.getElementById('statRooms').textContent = rooms.length;
-            document.getElementById('statCapacity').textContent = rooms.reduce((sum, r) => sum + r.capacity, 0);
             document.getElementById('statBeverages').textContent = beverages.length;
         });
     </script>

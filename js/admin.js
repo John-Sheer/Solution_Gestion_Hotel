@@ -1,5 +1,5 @@
 // ===========================================
-// HOTEL LE PRINCE - Admin Dashboard
+// Admin Dashboard
 // ===========================================
 
 let currentUser = null;

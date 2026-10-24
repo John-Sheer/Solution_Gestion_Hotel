@@ -1,5 +1,5 @@
 /**
- * Module Google Maps - Hotel Le Prince
+ * Module Google Maps - Hôtel
  * Affiche la carte avec marqueur personnalisé
  */
 
@@ -71,7 +71,7 @@ class HotelMap {
       position: this.hotelLocation,
       map: this.map,
       icon: icon,
-      title: 'Hotel Le Prince',
+      title: 'Hôtel',
       animation: google.maps.Animation.DROP
     });
 
@@ -79,10 +79,10 @@ class HotelMap {
     const infoWindow = new google.maps.InfoWindow({
       content: `
         <div style="padding: 10px; font-family: Arial, sans-serif;">
-          <h3 style="margin: 0 0 10px 0; color: #007bff;">Hotel Le Prince</h3>
+          <h3 style="margin: 0 0 10px 0; color: #007bff;">Hôtel</h3>
           <p style="margin: 5px 0;"><strong>📍 Adresse:</strong> Lomé, Togo</p>
           <p style="margin: 5px 0;"><strong>📞 Téléphone:</strong> +228 00 00 00 00</p>
-          <p style="margin: 5px 0;"><strong>✉️ Email:</strong> contact@hotelleprince.tg</p>
+          <p style="margin: 5px 0;"><strong>✉️ Email:</strong> contact@hotel.tg</p>
           <a href="https://www.google.com/maps/dir/?api=1&destination=${this.hotelLocation.lat},${this.hotelLocation.lng}" 
              target="_blank" 
              style="display: inline-block; margin-top: 10px; color: #007bff; text-decoration: none;">
@@ -280,7 +280,7 @@ class HotelMap {
         padding: 20px;
       ">
         <div>
-          <p style="font-size: 18px; margin-bottom: 10px;">📍 Hotel Le Prince</p>
+          <p style="font-size: 18px; margin-bottom: 10px;">📍 Hôtel</p>
           <p>Lomé, Togo</p>
           <a href="https://www.google.com/maps/search/?api=1&query=${this.hotelLocation.lat},${this.hotelLocation.lng}" 
              target="_blank"

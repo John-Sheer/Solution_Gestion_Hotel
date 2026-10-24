@@ -1,5 +1,5 @@
 // ===========================================
-// HOTEL LE PRINCE - Bar / Boissons
+// Bar / Boissons
 // ===========================================
 
 let currentCategoryFilter = 'all';
@@ -16,6 +16,11 @@ function renderBeverages() {
 
     if (currentCategoryFilter !== 'all') {
         filtered = filtered.filter(b => b.category === currentCategoryFilter);
+    }
+
+    const countElement = document.getElementById('beverageCount');
+    if (countElement) {
+        countElement.textContent = `${filtered.length} référence${filtered.length > 1 ? 's' : ''}`;
     }
 
     if (filtered.length === 0) {
@@ -62,7 +67,9 @@ function filterCategory(category) {
 }
 
 function addToCartAndUpdate(beverageId) {
-    addToCart(beverageId, 1);
+    const beverage = getBeverageById(beverageId);
+    if (!beverage) return;
+    addToCart(beverage, 1);
     updateCartUI();
 }
 

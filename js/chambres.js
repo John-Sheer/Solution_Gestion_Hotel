@@ -1,5 +1,5 @@
 // ===========================================
-// HOTEL LE PRINCE - Chambres
+// Chambres
 // ===========================================
 
 let currentTypeFilter = 'all';
@@ -12,6 +12,12 @@ function toggleMenu() {
 function renderRooms() {
     const rooms = getRooms();
     const grid = document.getElementById('roomsGrid');
+    const availableCount = rooms.filter(room => room.status === 'available').length;
+
+    ['heroAvailable', 'availableRooms'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = availableCount;
+    });
 
     let filtered = rooms;
 
@@ -41,10 +47,11 @@ function renderRooms() {
             <div class="room-card-image">
                 <img src="${room.image}" alt="${room.name}" loading="lazy">
                 <span class="room-status ${room.status}">${getStatusLabel(room.status)}</span>
+                <span class="room-capacity">${room.capacity} personnes</span>
             </div>
             <div class="room-card-content">
                 <h3>Chambre ${room.number}</h3>
-                <p class="room-type">${getTypeLabel(room.type)} • ${room.capacity} pers.</p>
+                <p class="room-type">${getTypeLabel(room.type)}</p>
                 <p class="room-price">${formatPrice(room.price)} <span>/ nuit</span></p>
                 <div class="room-features">
                     ${room.features.slice(0, 4).map(f => `<span class="room-feature">${f}</span>`).join('')}
@@ -54,7 +61,7 @@ function renderRooms() {
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                         </svg>
-                        Réserver
+                        Réserver cette chambre
                     </button>
                 ` : `
                     <button class="btn btn-secondary" disabled style="width: 100%;">

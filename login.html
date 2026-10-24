@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - Hôtel Le Prince</title>
+    <title>Connexion - Hotel carefour des retrouvailles | Tél : +22893848781 / 72334367</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -170,6 +170,289 @@
             }
         }
     </style>
+    <style>
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            background:
+                radial-gradient(900px 500px at 10% 0%, rgba(16, 42, 70, 0.14), transparent 60%),
+                radial-gradient(800px 500px at 100% 100%, rgba(23, 61, 92, 0.1), transparent 60%),
+                var(--bg-page);
+        }
+
+        .login-container {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            max-width: 1040px;
+            width: 100%;
+            background: #fff;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(10, 34, 55, 0.08);
+            box-shadow: 0 50px 100px -50px rgba(7, 26, 43, 0.45);
+        }
+
+        .login-visual {
+            background: linear-gradient(150deg, #071a2b, #0f3351);
+            padding: 64px 56px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-visual::before {
+            content: '';
+            position: absolute;
+            top: auto;
+            right: auto;
+            left: -120px;
+            bottom: -180px;
+            width: 420px;
+            height: 420px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.12), transparent 65%);
+        }
+
+        .login-visual::after {
+            content: '';
+            position: absolute;
+            inset: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 12px;
+            pointer-events: none;
+        }
+
+        .login-visual .hotel-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-visual .hotel-icon svg {
+            width: 30px;
+            height: 30px;
+            stroke: var(--brand-gold-soft);
+        }
+
+        .login-visual h1 {
+            font-family: var(--font-serif);
+            font-weight: 500;
+            font-size: 2.4rem;
+            letter-spacing: 0.12em;
+            color: var(--brand-ivory);
+            margin: 0 0 18px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-visual p {
+            font-size: 0.98rem;
+            line-height: 1.85;
+            color: rgba(248, 244, 236, 0.62);
+            max-width: 340px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-form-side {
+            padding: 60px 56px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-form-side h2 {
+            font-family: var(--font-serif);
+            font-size: 2rem;
+            font-weight: 500;
+            margin: 0 0 8px;
+        }
+
+        .login-form-side .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+            margin-bottom: 30px;
+        }
+
+        .login-form .form-group {
+            margin-bottom: 20px;
+        }
+
+        .login-form .form-label {
+            font-size: 0.66rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .login-form .form-input {
+            padding: 14px 16px;
+            font-size: 0.95rem;
+            border-radius: 6px;
+        }
+
+        .login-form .btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 0.74rem;
+            letter-spacing: 0.18em;
+            margin-top: 10px;
+        }
+
+        .login-error {
+            background: rgba(166, 59, 50, 0.08);
+            color: var(--color-danger);
+            border: 1px solid rgba(166, 59, 50, 0.2);
+            border-radius: 6px;
+            font-size: 0.84rem;
+        }
+
+        .login-footer {
+            margin-top: 28px;
+            padding-top: 22px;
+            border-top: 1px solid rgba(10, 34, 55, 0.08);
+            text-align: center;
+        }
+
+        .login-footer a {
+            color: var(--brand-navy);
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            text-decoration: none;
+        }
+
+        .login-footer a:hover {
+            color: var(--brand-navy);
+            text-decoration: none;
+        }
+
+        .login-form-side .footer-bottom p {
+            color: var(--text-secondary);
+        }
+
+        .login-form-side .footer-bottom a {
+            color: var(--brand-navy);
+        }
+
+        .login-form-side .footer-bottom a:hover {
+            color: var(--brand-navy);
+        }
+
+        @media (max-width: 900px) {
+            .login-container {
+                grid-template-columns: 1fr;
+                max-width: 520px;
+            }
+
+            .login-visual {
+                padding: 44px 36px;
+            }
+
+            .login-visual p {
+                max-width: none;
+            }
+
+            .login-form-side {
+                padding: 44px 36px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-page {
+                padding: 20px 14px;
+            }
+
+            .login-visual,
+            .login-form-side {
+                padding: 34px 24px;
+            }
+
+            .login-visual h1 {
+                font-size: 2rem;
+            }
+
+            .login-form-side h2 {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+    <style>
+        .login-page {
+            background:
+                radial-gradient(900px 520px at 10% 0%, rgba(16, 42, 70, 0.08), transparent 60%),
+                radial-gradient(800px 500px at 100% 100%, rgba(16, 42, 70, 0.05), transparent 60%),
+                var(--bg-page);
+        }
+
+        .login-container {
+            border-color: rgba(16, 42, 70, 0.12);
+            box-shadow: 0 50px 100px -55px rgba(16, 42, 70, 0.35);
+        }
+
+        .login-visual {
+            background: linear-gradient(150deg, #071a2b, #0f3351);
+        }
+
+        .login-visual::before {
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 65%);
+        }
+
+        .login-visual::after {
+            border-color: rgba(255, 255, 255, 0.22);
+        }
+
+        .login-visual .hotel-icon {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .login-visual .hotel-icon svg {
+            stroke: #fff;
+        }
+
+        .login-visual h1 {
+            color: #fff;
+        }
+
+        .login-visual p {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .login-footer a,
+        .login-form-side .footer-bottom a {
+            color: var(--brand-blue-dark);
+        }
+
+        .login-footer a:hover,
+        .login-form-side .footer-bottom a:hover {
+            color: var(--brand-blue);
+        }
+
+        .login-form .form-input {
+            border-color: rgba(16, 42, 70, 0.18);
+        }
+
+        .login-form .form-input:focus {
+            border-color: var(--brand-blue);
+            box-shadow: 0 0 0 3px rgba(16, 42, 70, 0.14);
+        }
+    </style>
 </head>
 
 <body>
@@ -183,7 +466,7 @@
                             d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
                     </svg>
                 </div>
-                <h1>Hôtel Le Prince</h1>
+                <h1>Hôtel</h1>
                 <p>Système de gestion hôtelière moderne. Connectez-vous pour accéder à votre espace de travail et gérer
                     l'établissement.</p>
             </div>
@@ -225,17 +508,17 @@
 
                 <div class="footer-bottom"
                     style="margin-top: 40px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 20px;">
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">© 2026 Hotel Le Prince. Tous droits
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">© 2026 Hôtel. Tous droits
                         réservés.</p>
                     <p><a href="#" id="sheerLink">Propulsé par <span
-                                style="color:var(--brand-gold); font-weight:600;">Sheer Tech™</span></a></p>
+                                style="color:var(--brand-navy); font-weight:600;">Sheer Tech™</span></a></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="storage.js"></script>
-    <script src="auth.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/auth.js"></script>
     <script>
         // Rediriger si déjà connecté
         if (isAuthenticated()) {

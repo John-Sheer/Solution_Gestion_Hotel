@@ -1,5 +1,5 @@
 /**
- * Module Formulaire de Contact - Hotel Le Prince
+ * Module Formulaire de Contact - Hôtel
  */
 
 class ContactForm {
