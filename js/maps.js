@@ -192,11 +192,11 @@ class HotelMap {
         },
         (error) => {
           console.error('Erreur géolocalisation:', error);
-          alert('Impossible d\'obtenir votre position');
+          showAppAlert('Impossible d\'obtenir votre position');
         }
       );
     } else {
-      alert('La géolocalisation n\'est pas supportée par votre navigateur');
+      showAppAlert('La géolocalisation n\'est pas supportée par votre navigateur');
     }
   }
 

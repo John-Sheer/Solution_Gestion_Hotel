@@ -14,6 +14,7 @@ function checkAuth() {
         return false;
     }
 
+    protectDashboardExit();
     currentUser = getCurrentUser();
 
     // Update UI based on role
@@ -26,7 +27,7 @@ function checkAuth() {
         <div class="user-badge">
             <div class="avatar">${currentUser.name.charAt(0)}</div>
             <span>${currentUser.name}</span>
-            <button onclick="logout()" style="background: none; border: none; cursor: pointer; margin-left: 8px;" title="Déconnexion">
+            <button onclick="logout()" style="background: none; border: none; cursor: pointer; margin-left: 8px;" title="Déconnexion" aria-label="Se déconnecter">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
                 </svg>
@@ -68,6 +69,7 @@ function checkAuth() {
         el.style.display = isOwner ? 'none' : '';
     });
 
+    document.body.classList.remove('auth-pending');
     return true;
 }
 
@@ -288,13 +290,13 @@ function renderActivityLog() {
 }
 
 // Staff actions
-function doCheckout(reservationId) {
+async function doCheckout(reservationId) {
     if (!canPerformAction('checkout')) {
-        alert('Action non autorisée');
+        showAppAlert('Action non autorisée');
         return;
     }
 
-    if (confirm('Confirmer le check-out ?')) {
+    if (await showAppConfirm('Confirmer le check-out ?', { title: 'Enregistrer le départ' })) {
         completeReservation(reservationId);
         logAction('CHECKOUT', `Check-out réservation #${reservationId}`);
         renderAll();
@@ -303,13 +305,13 @@ function doCheckout(reservationId) {
 
 function doCheckin(reservationId) {
     if (!canPerformAction('checkin')) {
-        alert('Action non autorisée');
+        showAppAlert('Action non autorisée');
         return;
     }
 
     const reservation = checkInReservation(reservationId);
     if (!reservation) {
-        alert('Le check-in est impossible : vérifiez les dates et la disponibilité de la chambre.');
+        showAppAlert('Le check-in est impossible : vérifiez les dates et la disponibilité de la chambre.');
         return;
     }
 
@@ -319,13 +321,13 @@ function doCheckin(reservationId) {
 
 function doConfirmReservation(reservationId) {
     if (!canPerformAction('confirm_reservation')) {
-        alert('Action non autorisée');
+        showAppAlert('Action non autorisée');
         return;
     }
 
     const reservation = confirmReservation(reservationId);
     if (!reservation) {
-        alert('Impossible de confirmer : la chambre est déjà réservée ou indisponible pour ces dates.');
+        showAppAlert('Impossible de confirmer : la chambre est déjà réservée ou indisponible pour ces dates.');
         renderAll();
         return;
     }
@@ -334,13 +336,13 @@ function doConfirmReservation(reservationId) {
     renderAll();
 }
 
-function doCancelReservation(reservationId) {
+async function doCancelReservation(reservationId) {
     if (!canPerformAction('cancel_reservation')) {
-        alert('Action non autorisée');
+        showAppAlert('Action non autorisée');
         return;
     }
 
-    if (confirm('Annuler cette réservation ?')) {
+    if (await showAppConfirm('Annuler cette réservation ?', { title: 'Annuler la réservation' })) {
         cancelReservation(reservationId);
         logAction('RESERVATION_CANCEL', `Réservation #${reservationId} annulée`);
         renderAll();
@@ -349,7 +351,7 @@ function doCancelReservation(reservationId) {
 
 function doValidateOrder(orderId) {
     if (!canPerformAction('validate_order')) {
-        alert('Action non autorisée');
+        showAppAlert('Action non autorisée');
         return;
     }
 
@@ -358,13 +360,13 @@ function doValidateOrder(orderId) {
     renderAll();
 }
 
-function doCancelOrder(orderId) {
+async function doCancelOrder(orderId) {
     if (!canPerformAction('cancel_order')) {
-        alert('Action non autorisée');
+        showAppAlert('Action non autorisée');
         return;
     }
 
-    if (confirm('Annuler cette commande ?')) {
+    if (await showAppConfirm('Annuler cette commande ?', { title: 'Annuler la commande' })) {
         updateOrderStatus(orderId, 'cancelled', currentUser);
         logAction('ORDER_CANCEL', `Commande #${orderId} annulée`);
         renderAll();
@@ -373,7 +375,7 @@ function doCancelOrder(orderId) {
 
 function doChangeRoomStatus(roomId, status) {
     if (!canPerformAction('update_room_status')) {
-        alert('Action non autorisée');
+        showAppAlert('Action non autorisée');
         renderAll();
         return;
     }
@@ -385,7 +387,7 @@ function doChangeRoomStatus(roomId, status) {
 
 function doRestock(beverageId) {
     if (!canPerformAction('restock')) {
-        alert('Action non autorisée');
+        showAppAlert('Action non autorisée');
         return;
     }
 

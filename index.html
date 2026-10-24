@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="css/styles-modules.css">
 
     <!-- Scripts du site -->
+    <script src="js/dialogs.js"></script>
     <script src="js/api-config.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/auth.js"></script>
@@ -39,7 +40,7 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="container">
-            <a href="index.html" class="navbar-brand">
+            <a href="index.html" class="navbar-brand navbar-brand--full">
                 <div class="logo-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor">
@@ -47,7 +48,7 @@
                             d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
                     </svg>
                 </div>
-                <h1>Hôtel</h1>
+                <h1>Hôtel Carrefour des Retrouvailles</h1>
             </a>
             <button class="menu-toggle" onclick="toggleMenu()" aria-controls="navMenu" aria-expanded="false" aria-label="Ouvrir le menu de navigation">
                 <span></span><span></span><span></span>
@@ -89,9 +90,9 @@
                         <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1000&q=80"
                             alt="Façade et piscine de l'hôtel">
                     </div>
-                    <a href="chambres.html" class="hero-rating" style="text-decoration:none;">
-                        <span class="hero-rating-score" id="homeAvailableRooms">--</span>
-                        <div class="hero-rating-copy">
+                    <a href="chambres.html" class="hero-availability-badge">
+                        <span class="hero-availability-count" id="homeAvailableRooms">--</span>
+                        <div class="hero-availability-copy">
                             <span>Chambres disponibles</span>
                         </div>
                     </a>

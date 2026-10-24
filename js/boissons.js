@@ -164,7 +164,7 @@ function submitOrder(event) {
 
     const roomNumber = document.getElementById('orderRoom').value;
     if (!roomNumber) {
-        alert('Veuillez sélectionner une chambre');
+        showAppAlert('Veuillez sélectionner une chambre');
         return;
     }
 
@@ -175,7 +175,7 @@ function submitOrder(event) {
         closeOrderModal();
         closeCart();
         updateCartUI();
-        alert('Commande envoyée! Un serveur vous apportera votre commande.');
+        showAppAlert('Commande envoyée ! Un serveur vous apportera votre commande.');
     }
 }
 

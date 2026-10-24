@@ -5,6 +5,10 @@
 const AUTH_KEY = 'hotel_auth';
 const USERS_KEY = 'hotel_users';
 const ACTIONS_LOG_KEY = 'hotel_actions';
+const DASHBOARD_EXIT_WARNING = 'Vous allez quitter le tableau de bord. Vos identifiants seront demandés à nouveau avant d’y accéder.';
+
+// Supprimer les anciennes sessions persistantes créées avant le passage à sessionStorage.
+localStorage.removeItem(AUTH_KEY);
 
 // Utilisateurs par défaut
 // Rôles : owner (propriétaire, lecture seule), hotel_manager (gérant hôtel), bar_manager (gérant bar)
@@ -60,7 +64,7 @@ function login(username, password) {
             role: user.role,
             loginTime: new Date().toISOString()
         };
-        localStorage.setItem(AUTH_KEY, JSON.stringify(session));
+        sessionStorage.setItem(AUTH_KEY, JSON.stringify(session));
         logAction('LOGIN', `Connexion réussie`);
         return { success: true, user: session };
     }
@@ -69,18 +73,69 @@ function login(username, password) {
 }
 
 // Déconnexion
-function logout() {
+async function logout() {
+    const confirmed = await showAppConfirm(DASHBOARD_EXIT_WARNING, {
+        title: 'Quitter le tableau de bord ?',
+        confirmLabel: 'Quitter',
+        cancelLabel: 'Rester'
+    });
+    if (!confirmed) return false;
+
+    clearAuthSession();
+    window.dashboardExitConfirmed = true;
+    window.location.replace('login.html');
+    return true;
+}
+
+function clearAuthSession() {
     const session = getCurrentUser();
     if (session) {
         logAction('LOGOUT', `Déconnexion`);
     }
+    sessionStorage.removeItem(AUTH_KEY);
     localStorage.removeItem(AUTH_KEY);
-    window.location.href = 'login.html';
+}
+
+function protectDashboardExit() {
+    document.addEventListener('click', async (event) => {
+        const link = event.target.closest('a[href]');
+        if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+
+        const destination = new URL(link.href, window.location.href);
+        if (destination.origin === window.location.origin
+            && destination.pathname === window.location.pathname
+            && destination.search === window.location.search) return;
+
+        event.preventDefault();
+        const confirmed = await showAppConfirm(DASHBOARD_EXIT_WARNING, {
+            title: 'Quitter le tableau de bord ?',
+            confirmLabel: 'Quitter',
+            cancelLabel: 'Rester'
+        });
+        if (!confirmed) return;
+
+        clearAuthSession();
+        window.dashboardExitConfirmed = true;
+        window.location.assign(destination.href);
+    });
+
+    window.addEventListener('beforeunload', (event) => {
+        if (window.dashboardExitConfirmed) return;
+        event.preventDefault();
+        event.returnValue = '';
+    });
+
+    window.addEventListener('pagehide', clearAuthSession);
+    window.addEventListener('pageshow', (event) => {
+        if (event.persisted && !isAuthenticated()) {
+            window.location.replace('login.html');
+        }
+    });
 }
 
 // Obtenir l'utilisateur connecté
 function getCurrentUser() {
-    const session = localStorage.getItem(AUTH_KEY);
+    const session = sessionStorage.getItem(AUTH_KEY);
     return session ? JSON.parse(session) : null;
 }
 
@@ -135,8 +190,11 @@ function requireAuth(allowedRoles = ['owner', 'staff']) {
     }
 
     if (!allowedRoles.includes(user.role)) {
-        alert('Accès non autorisé');
-        logout();
+        showAppAlert('Accès non autorisé').then(() => {
+            clearAuthSession();
+            window.dashboardExitConfirmed = true;
+            window.location.replace('login.html');
+        });
         return false;
     }
 

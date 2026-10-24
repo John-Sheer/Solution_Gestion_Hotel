@@ -1726,6 +1726,18 @@ h4 {
     margin: 0;
 }
 
+.navbar-brand--full {
+    min-width: 0;
+    gap: 10px;
+}
+
+.navbar-brand--full h1 {
+    max-width: min(34vw, 330px);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    line-height: 1.35;
+}
+
 .navbar-menu {
     gap: 6px;
     align-items: center;
@@ -3389,6 +3401,59 @@ body {
     box-shadow: 0 0 0 3px rgba(31, 122, 77, 0.14);
 }
 
+.hero-availability-badge {
+    position: absolute;
+    top: 24px;
+    right: 22px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 205px;
+    padding: 12px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    background: var(--brand-navy);
+    box-shadow: 0 16px 34px -18px rgba(10, 25, 47, 0.72);
+    color: var(--text-light);
+    text-decoration: none;
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.hero-availability-badge:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 38px -18px rgba(10, 25, 47, 0.78);
+}
+
+.hero-availability-badge:focus-visible {
+    outline: 3px solid var(--brand-gold);
+    outline-offset: 3px;
+}
+
+.hero-availability-count {
+    display: grid;
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    place-items: center;
+    border-radius: 12px;
+    background: var(--brand-gold);
+    color: var(--brand-navy);
+    font-family: var(--font-serif);
+    font-size: 1.65rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.hero-availability-copy {
+    color: var(--text-light);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1.45;
+    text-transform: uppercase;
+}
+
 /* ---------- Statistiques ---------- */
 .stats-section {
     background: var(--bg-page);
@@ -3985,6 +4050,138 @@ tbody tr:hover {
     border-top: 0;
 }
 
+/* ---------- Dialogues de confirmation et d'information ---------- */
+.app-dialog {
+    width: min(440px, calc(100% - 32px));
+    max-width: none;
+    padding: 0;
+    overflow: visible;
+    border: 1px solid rgba(16, 42, 70, 0.12);
+    border-radius: 18px;
+    background: #fff;
+    color: var(--text-primary);
+    box-shadow: 0 24px 70px rgba(10, 25, 47, 0.28);
+}
+
+.app-dialog::backdrop {
+    background: rgba(10, 25, 47, 0.62);
+    backdrop-filter: blur(3px);
+}
+
+.app-dialog[open] {
+    animation: appDialogEnter 180ms ease-out;
+}
+
+.app-dialog__content {
+    padding: 30px;
+    text-align: center;
+}
+
+.app-dialog__icon {
+    display: grid;
+    width: 46px;
+    height: 46px;
+    margin: 0 auto 16px;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(16, 42, 70, 0.09);
+    color: var(--brand-navy);
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.app-dialog__title {
+    margin: 0;
+    color: var(--brand-navy);
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+}
+
+.app-dialog__message {
+    margin: 12px 0 24px;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.app-dialog__actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.app-dialog__button {
+    min-height: 44px;
+    padding: 10px 18px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.app-dialog__button:hover {
+    transform: translateY(-1px);
+}
+
+.app-dialog__button:focus-visible {
+    outline: 3px solid rgba(16, 42, 70, 0.28);
+    outline-offset: 2px;
+}
+
+.app-dialog__button--primary {
+    background: var(--brand-navy);
+    color: #fff;
+}
+
+.app-dialog__button--primary:hover {
+    background: var(--brand-navy-light);
+}
+
+.app-dialog__button--secondary {
+    border-color: rgba(16, 42, 70, 0.18);
+    background: #fff;
+    color: var(--text-primary);
+}
+
+.app-dialog__button--secondary:hover {
+    background: var(--bg-surface);
+}
+
+@keyframes appDialogEnter {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 480px) {
+    .app-dialog__content {
+        padding: 24px 20px;
+    }
+
+    .app-dialog__actions {
+        flex-direction: column;
+    }
+
+    .app-dialog__button {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-dialog[open],
+    .app-dialog__button {
+        animation: none;
+        transition: none;
+    }
+}
+
 /* ---------- Responsive du refresh ---------- */
 @media (max-width: 1024px) {
     .services-layout {
@@ -4005,6 +4202,24 @@ tbody tr:hover {
 @media (max-width: 768px) {
     .hero {
         padding-bottom: 68px;
+    }
+
+    .hero-availability-badge {
+        top: 16px;
+        right: 14px;
+        min-width: 0;
+        padding: 9px 12px;
+    }
+
+    .hero-availability-count {
+        flex-basis: 40px;
+        width: 40px;
+        height: 40px;
+        font-size: 1.4rem;
+    }
+
+    .hero-availability-copy {
+        font-size: 0.65rem;
     }
 
     .hero-availability {
@@ -4415,6 +4630,12 @@ table {
     .navbar-brand h1 {
         font-size: 0.82rem;
         letter-spacing: 0.22em;
+    }
+
+    .navbar-brand--full h1 {
+        max-width: 185px;
+        font-size: 0.67rem;
+        letter-spacing: 0.04em;
     }
 
     .logo-icon {

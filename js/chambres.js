@@ -158,15 +158,15 @@ function submitReservation(event) {
     const checkOutValue = document.getElementById('checkOut').value;
 
     if (!room || !checkInValue || !checkOutValue || checkOut <= checkIn) {
-        alert('Veuillez sélectionner des dates de séjour valides.');
+        showAppAlert('Veuillez sélectionner des dates de séjour valides.');
         return;
     }
     if (guests > room.capacity) {
-        alert(`Cette chambre peut accueillir au maximum ${room.capacity} personne(s).`);
+        showAppAlert(`Cette chambre peut accueillir au maximum ${room.capacity} personne(s).`);
         return;
     }
     if (!isRoomAvailableForDates(roomId, checkInValue, checkOutValue)) {
-        alert('Cette chambre n’est pas disponible pour ces dates. Choisissez une autre période ou une autre chambre.');
+        showAppAlert('Cette chambre n’est pas disponible pour ces dates. Choisissez une autre période ou une autre chambre.');
         return;
     }
 
@@ -186,14 +186,14 @@ function submitReservation(event) {
     // For client reservations, mark as pending (will be confirmed by staff)
     const createdReservation = addReservation(reservation, null);
     if (!createdReservation) {
-        alert('Cette chambre vient d’être demandée pour ces dates. Veuillez réessayer avec une autre période.');
+        showAppAlert('Cette chambre vient d’être demandée pour ces dates. Veuillez réessayer avec une autre période.');
         return;
     }
 
     closeModal();
     renderRooms();
 
-    alert('Votre demande de réservation a été envoyée. Elle reste à confirmer par notre équipe.');
+    showAppAlert('Votre demande de réservation a été envoyée. Elle reste à confirmer par notre équipe.');
 }
 
 // Event listeners
