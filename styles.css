@@ -3403,25 +3403,25 @@ body {
 
 .hero-availability-badge {
     position: absolute;
-    top: 24px;
-    right: 22px;
+    top: 14px;
+    left: 50%;
     z-index: 2;
     display: flex;
     align-items: center;
     gap: 12px;
-    min-width: 205px;
-    padding: 12px 16px;
+    padding: 8px 16px 8px 8px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 14px;
+    border-radius: 999px;
     background: var(--brand-navy);
     box-shadow: 0 16px 34px -18px rgba(10, 25, 47, 0.72);
     color: var(--text-light);
     text-decoration: none;
+    transform: translateX(-50%);
     transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
 .hero-availability-badge:hover {
-    transform: translateY(-3px);
+    transform: translate(-50%, -3px);
     box-shadow: 0 20px 38px -18px rgba(10, 25, 47, 0.78);
 }
 
@@ -3432,11 +3432,12 @@ body {
 
 .hero-availability-count {
     display: grid;
-    flex: 0 0 46px;
-    width: 46px;
-    height: 46px;
+    flex: 0 0 50px;
+    width: 50px;
+    height: 50px;
     place-items: center;
-    border-radius: 12px;
+    border: 2px solid rgba(10, 25, 47, 0.12);
+    border-radius: 50%;
     background: var(--brand-gold);
     color: var(--brand-navy);
     font-family: var(--font-serif);
@@ -4205,16 +4206,15 @@ tbody tr:hover {
     }
 
     .hero-availability-badge {
-        top: 16px;
-        right: 14px;
-        min-width: 0;
-        padding: 9px 12px;
+        top: 10px;
+        gap: 9px;
+        padding: 6px 13px 6px 6px;
     }
 
     .hero-availability-count {
-        flex-basis: 40px;
-        width: 40px;
-        height: 40px;
+        flex-basis: 42px;
+        width: 42px;
+        height: 42px;
         font-size: 1.4rem;
     }
 
