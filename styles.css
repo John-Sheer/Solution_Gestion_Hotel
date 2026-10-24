@@ -3403,56 +3403,56 @@ body {
 
 .hero-availability-badge {
     position: absolute;
-    top: 14px;
+    top: 12px;
     left: 50%;
     z-index: 2;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 8px 16px 8px 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    gap: 9px;
+    padding: 6px 13px 6px 6px;
+    border: 1px solid rgba(16, 42, 70, 0.12);
     border-radius: 999px;
-    background: var(--brand-navy);
-    box-shadow: 0 16px 34px -18px rgba(10, 25, 47, 0.72);
-    color: var(--text-light);
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 8px 24px rgba(10, 25, 47, 0.16);
+    color: var(--brand-navy);
     text-decoration: none;
     transform: translateX(-50%);
-    transition: transform 180ms ease, box-shadow 180ms ease;
+    transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
 }
 
 .hero-availability-badge:hover {
     transform: translate(-50%, -3px);
-    box-shadow: 0 20px 38px -18px rgba(10, 25, 47, 0.78);
+    background: #fff;
+    box-shadow: 0 12px 28px rgba(10, 25, 47, 0.2);
 }
 
 .hero-availability-badge:focus-visible {
-    outline: 3px solid var(--brand-gold);
+    outline: 3px solid var(--brand-navy-light);
     outline-offset: 3px;
 }
 
 .hero-availability-count {
     display: grid;
-    flex: 0 0 50px;
-    width: 50px;
-    height: 50px;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
     place-items: center;
-    border: 2px solid rgba(10, 25, 47, 0.12);
+    border: 1px solid rgba(10, 25, 47, 0.08);
     border-radius: 50%;
-    background: var(--brand-gold);
-    color: var(--brand-navy);
+    background: var(--brand-navy);
+    color: #fff;
     font-family: var(--font-serif);
-    font-size: 1.65rem;
+    font-size: 1.25rem;
     font-weight: 700;
     line-height: 1;
 }
 
 .hero-availability-copy {
-    color: var(--text-light);
-    font-size: 0.72rem;
+    color: var(--brand-navy);
+    font-size: 0.68rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    line-height: 1.45;
-    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    line-height: 1.3;
 }
 
 /* ---------- Statistiques ---------- */
@@ -4206,20 +4206,20 @@ tbody tr:hover {
     }
 
     .hero-availability-badge {
-        top: 10px;
-        gap: 9px;
-        padding: 6px 13px 6px 6px;
+        top: 8px;
+        gap: 8px;
+        padding: 5px 11px 5px 5px;
     }
 
     .hero-availability-count {
-        flex-basis: 42px;
-        width: 42px;
-        height: 42px;
-        font-size: 1.4rem;
+        flex-basis: 32px;
+        width: 32px;
+        height: 32px;
+        font-size: 1.1rem;
     }
 
     .hero-availability-copy {
-        font-size: 0.65rem;
+        font-size: 0.62rem;
     }
 
     .hero-availability {
