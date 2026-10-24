@@ -5,7 +5,6 @@ const API_CONFIG = {
   // Endpoints disponibles
   ENDPOINTS: {
     reservations: '/reservations',
-    reviews: '/reviews',
     contact: '/contact',
     rooms: '/rooms',
     health: '/health'
@@ -62,18 +61,6 @@ class API {
 
   static async getReservations(page = 1, limit = 10) {
     return this.request(`${API_CONFIG.ENDPOINTS.reservations}?page=${page}&limit=${limit}`);
-  }
-
-  // Avis clients
-  static async createReview(data) {
-    return this.request(API_CONFIG.ENDPOINTS.reviews, {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
-  }
-
-  static async getReviews(page = 1, limit = 10) {
-    return this.request(`${API_CONFIG.ENDPOINTS.reviews}?page=${page}&limit=${limit}`);
   }
 
   // Contact

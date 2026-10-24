@@ -70,7 +70,7 @@ class AnimationController {
   }
 
   animateCards() {
-    const cards = document.querySelectorAll('.card, .room-card, .service-card, .review-card');
+    const cards = document.querySelectorAll('.card, .room-card, .service-card');
     
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
