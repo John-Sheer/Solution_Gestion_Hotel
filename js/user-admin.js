@@ -36,7 +36,14 @@ async function inviteStaffUser(event) {
         const { data, error } = await getSupabaseClient().functions.invoke('admin-create-user', {
             body: { fullName, email, role }
         });
-        if (error) throw error;
+        if (error) {
+            const response = error.context;
+            if (response && typeof response.clone === 'function') {
+                const payload = await response.clone().json().catch(() => null);
+                if (typeof payload?.error === 'string') throw new Error(payload.error);
+            }
+            throw error;
+        }
         if (!data?.invited) throw new Error('Le service n’a pas confirmé la création du compte.');
         form.reset();
         showUserInvitationStatus(`Invitation envoyée à ${email}. Le compte sera actif après acceptation.`);

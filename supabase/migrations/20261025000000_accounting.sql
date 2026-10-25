@@ -180,6 +180,7 @@ revoke all on public.cash_closures from anon, authenticated;
 revoke all on public.cash_closure_reviews from anon, authenticated;
 grant select on public.staff_profiles, public.accounting_opening_balances,
     public.accounting_entries, public.cash_closures, public.cash_closure_reviews to authenticated;
+grant insert on public.staff_profiles to service_role;
 
 create or replace function public.configure_accounting_opening_balance(
     p_cashier_id uuid,

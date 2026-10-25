@@ -100,7 +100,19 @@ Deno.serve(async (request: Request) => {
                 error: "L’invitation est partie mais le profil n’a pas été créé et le compte provisoire n’a pas pu être supprimé. Une intervention est requise.",
             }, 500);
         }
-        return jsonResponse({ error: "Le profil n’a pas pu être créé ; le compte provisoire a été supprimé." }, 500);
+        if (insertError.code === "42501") {
+            return jsonResponse({
+                error: "Permissions Supabase insuffisantes : exécutez GRANT INSERT ON public.staff_profiles TO service_role; dans le SQL Editor.",
+            }, 500);
+        }
+        if (insertError.code === "23505") {
+            return jsonResponse({
+                error: "Ce rôle ou ce compte existe déjà. Vérifiez les utilisateurs et profils avant de réessayer.",
+            }, 409);
+        }
+        return jsonResponse({
+            error: "Le profil n’a pas pu être créé ; le compte provisoire a été supprimé. Vérifiez les journaux de la fonction.",
+        }, 500);
     }
 
     return jsonResponse({ invited: true, userId: invitation.user.id, email }, 201);
