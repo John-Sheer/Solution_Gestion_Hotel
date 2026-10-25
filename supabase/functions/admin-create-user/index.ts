@@ -79,7 +79,21 @@ Deno.serve(async (request: Request) => {
         .inviteUserByEmail(email, { data: { full_name: fullName } });
     if (invitationError) {
         console.error("Supabase could not send the staff invitation:", invitationError);
-        return jsonResponse({ error: "Impossible d’envoyer l’invitation. Vérifiez l’adresse ou les réglages e-mail." }, 400);
+        const message = invitationError.message.toLowerCase();
+        if (message.includes("rate limit")) {
+            return jsonResponse({
+                error: "La limite d’envoi d’e-mails de Supabase est atteinte. Attendez avant de réessayer ou configurez un fournisseur SMTP.",
+            }, 429);
+        }
+        if (message.includes("already registered") || message.includes("already exists")) {
+            return jsonResponse({
+                error: "Cette adresse e-mail possède déjà un compte Supabase. Vérifiez la liste des utilisateurs Auth avant de renvoyer l’invitation.",
+            }, 409);
+        }
+        const status = invitationError.status;
+        return jsonResponse({
+            error: `Supabase a refusé l’invitation : ${invitationError.message}`,
+        }, typeof status === "number" && status >= 400 && status < 600 ? status : 502);
     }
     if (!invitation.user) {
         return jsonResponse({ error: "Supabase n’a pas retourné le compte invité." }, 502);
