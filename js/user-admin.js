@@ -17,7 +17,7 @@ function showUserInvitationStatus(message, isError = false) {
 async function inviteStaffUser(event) {
     event.preventDefault();
     if (currentUser?.role !== 'super_admin') {
-        throw new Error('Seul le superuser peut inviter des comptes gérants.');
+        throw new Error('Seul le superuser peut inviter des utilisateurs.');
     }
 
     const form = event.currentTarget;
@@ -26,7 +26,7 @@ async function inviteStaffUser(event) {
     const email = form.elements.email.value.trim().toLowerCase();
     const role = form.elements.role.value;
 
-    if (fullName.length < 2 || !['hotel_manager', 'bar_manager'].includes(role)) {
+    if (fullName.length < 2 || !['owner', 'hotel_manager', 'bar_manager'].includes(role)) {
         throw new Error('Vérifiez le nom et le rôle sélectionné.');
     }
 

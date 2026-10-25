@@ -53,7 +53,7 @@ Deno.serve(async (request: Request) => {
         return jsonResponse({ error: "Impossible de vérifier les droits du compte." }, 500);
     }
     if (!profile?.active || profile.role !== "super_admin") {
-        return jsonResponse({ error: "Seul le superuser peut inviter des comptes gérants." }, 403);
+        return jsonResponse({ error: "Seul le superuser peut inviter des utilisateurs." }, 403);
     }
 
     let input: { fullName?: unknown; email?: unknown; role?: unknown };
@@ -68,7 +68,7 @@ Deno.serve(async (request: Request) => {
     const role = input.role;
     if (fullName.length < 2 || fullName.length > 120
         || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-        || !["hotel_manager", "bar_manager"].includes(String(role))) {
+        || !["owner", "hotel_manager", "bar_manager"].includes(String(role))) {
         return jsonResponse({ error: "Nom, adresse e-mail ou rôle invalide." }, 400);
     }
 

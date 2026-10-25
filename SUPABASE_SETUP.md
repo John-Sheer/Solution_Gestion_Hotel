@@ -15,7 +15,7 @@ insert into public.staff_profiles (id, full_name, role)
 values ('UUID-DU-SUPERUSER', 'Superuser', 'super_admin');
 ```
 
-Le superuser peut inviter des comptes `hotel_manager` et `bar_manager` depuis le tableau de bord. Il ne peut pas créer de propriétaire ni accéder aux écritures, clôtures ou justificatifs financiers. Le propriétaire conserve ces droits financiers et se configure séparément avec le rôle `owner`.
+Le superuser peut inviter un compte `owner`, `hotel_manager` ou `bar_manager` depuis le tableau de bord. Un seul profil propriétaire est autorisé. Le superuser ne peut pas consulter ni modifier les écritures, clôtures ou justificatifs financiers ; le compte `owner` conserve ces droits.
 
 ## 2. Configurer le site
 
@@ -32,13 +32,6 @@ supabase functions deploy admin-create-user
 La fonction utilise `SUPABASE_SERVICE_ROLE_KEY` uniquement dans l’environnement serveur fourni par Supabase. Ne créez pas de variable de service-role dans le navigateur. L’adresse d’invitation doit être autorisée par les réglages SMTP et URL de redirection du projet.
 
 Publiez ensuite les fichiers statiques sur un hébergement HTTPS. Ne testez pas l’authentification depuis `file://` : l’URL de redirection et les règles d’origine doivent correspondre au domaine configuré dans Supabase Auth.
-
-Après avoir créé le propriétaire dans **Authentication → Users**, ajoutez son profil avec son UUID (et remplacez le nom) :
-
-```sql
-insert into public.staff_profiles (id, full_name, role)
-values ('UUID-DU-PROPRIETAIRE', 'Nom du propriétaire', 'owner');
-```
 
 ## 3. Initialiser les caisses
 
