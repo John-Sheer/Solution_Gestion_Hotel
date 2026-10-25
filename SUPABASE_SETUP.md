@@ -6,7 +6,7 @@ La comptabilité utilise Supabase Auth, PostgreSQL et le stockage privé Supabas
 
 1. Créez un projet Supabase dans une région adaptée à l’établissement.
 2. Dans **Authentication → Providers**, gardez l’authentification e-mail activée et désactivez les inscriptions publiques. Configurez aussi l’URL HTTPS du site dans **Authentication → URL Configuration**.
-3. Dans **SQL Editor**, exécutez une seule fois le contenu de `supabase/migrations/20261025000000_accounting.sql`.
+3. Dans **SQL Editor**, exécutez les migrations dans l’ordre : d’abord `supabase/migrations/20261025000000_accounting.sql`, puis `supabase/migrations/20261025010000_shared_hotel_operations.sql`. La seconde crée les chambres, boissons, réservations et commandes partagées ainsi que leurs fonctions d’accès. Ne la relancez pas si elle a déjà été appliquée.
 4. Dans **Authentication → Users**, créez manuellement le compte initial du superuser avec une adresse que vous contrôlez. Définissez son mot de passe dans Supabase ; ne le partagez pas. Copiez son UUID.
 5. Ajoutez le profil superuser dans SQL Editor en remplaçant l’UUID et le nom :
 
@@ -46,6 +46,7 @@ Les écritures et décisions ne peuvent pas être modifiées ou supprimées par 
 ## Limites à connaître
 
 - La base comptable, l’authentification et les justificatifs sont partagés et protégés par les politiques de la base. Toutefois, aucune application ne peut garantir une comptabilité « sans faille » sans contrôles humains, rapprochement des relevés Mobile Money/bancaires, sauvegardes et procédure de revue.
-- Les réservations, chambres, commandes du bar et stocks de ce site restent actuellement dans le `localStorage` du navigateur. La référence saisie dans une écriture permet le rapprochement humain, mais le montant d’un séjour ou d’une commande n’est pas encore vérifié automatiquement par PostgreSQL, et ces données opérationnelles ne sont pas synchronisées entre appareils. Pour une réconciliation entièrement automatisée, ces données doivent également être migrées vers la base partagée.
-- Les nouvelles écritures commencent à la date de mise en service et au fonds initial saisi ; aucun historique antérieur n’est importé automatiquement.
+- Les nouvelles réservations et commandes ne sont enregistrées qu’après application de la migration des opérations partagées. Les réservations, états de maintenance, commandes et stocks deviennent alors visibles sur les appareils connectés ; l’ancien historique conservé dans les navigateurs n’est pas importé.
+- Le registre comptable reste indépendant des opérations hôtelières : le montant d’un séjour ou d’une commande n’est pas encore rapproché automatiquement avec les encaissements et le chiffre d’affaires comptabilisés. Les écritures commencent à la date de mise en service et au fonds initial saisi ; aucun historique comptable antérieur n’est importé automatiquement.
+- Le journal d’activité de l’interface reste local au navigateur et n’est pas un journal d’audit partagé. Pour une traçabilité complète, appuyez-vous sur les données d’opérations et le registre comptable central.
 - Sans configuration Supabase valide, la connexion centrale est indisponible : il n’existe volontairement aucun retour silencieux vers les anciens comptes locaux.

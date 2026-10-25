@@ -168,6 +168,7 @@ function addRoom(room) {
 
 // ============ RÉSERVATIONS ============
 function getReservations() {
+    if (Array.isArray(window.hotelSharedReservations)) return window.hotelSharedReservations;
     return getData(STORAGE_KEYS.RESERVATIONS) || [];
 }
 
@@ -403,6 +404,7 @@ function getCartItemCount() { return getCart().reduce((c, i) => c + i.quantity, 
 
 // ============ COMMANDES ============
 function getOrders() {
+    if (Array.isArray(window.hotelSharedOrders)) return window.hotelSharedOrders;
     return getData(STORAGE_KEYS.ORDERS) || [];
 }
 

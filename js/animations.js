@@ -311,7 +311,6 @@ let pageLoader;
 
 document.addEventListener('DOMContentLoaded', () => {
   animationController = new AnimationController();
-  pageLoader = new PageLoader();
 });
 
 // Export pour utilisation externe

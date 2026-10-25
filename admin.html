@@ -30,7 +30,7 @@
                             d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
                     </svg>
                 </div>
-                <h1>Hôtel Carrefour des Retrouvailles</h1>
+                <span>Hôtel Carrefour des Retrouvailles</span>
             </a>
             <button class="menu-toggle" onclick="toggleMenu()" aria-controls="navMenu" aria-expanded="false" aria-label="Ouvrir le menu de navigation"><span></span><span></span><span></span></button>
             <ul class="navbar-menu" id="navMenu">
@@ -50,6 +50,7 @@
                         </svg>
                         Chambres
                     </a></li>
+                <li><a href="boissons.html">Bar / Boissons</a></li>
                 <li><a href="admin.html" class="active">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor">
@@ -295,6 +296,15 @@
                 </section>
             </section>
 
+            <nav class="dashboard-jump-links" aria-label="Accès rapide aux sections">
+                <a href="#reservationsSection">Réservations</a>
+                <a href="#ordersSection">Commandes</a>
+                <a href="#roomStatusSection">Chambres</a>
+                <a href="#stockSection">Stock</a>
+                <a href="#activitySection">Historique</a>
+            </nav>
+            <p id="sharedOperationsStatus" class="room-search-status" role="status" aria-live="polite"></p>
+
             <!-- Tables Grid -->
             <div class="admin-tables">
 
@@ -312,6 +322,7 @@
                         </h3>
                         <div class="reservation-header-actions">
                             <span class="badge badge-warning" id="pendingReservationsCount">0 à confirmer</span>
+                            <button class="btn btn-secondary" type="button" id="refreshReservationsButton">Actualiser</button>
                             <button class="btn reservation-action reservation-action--new" id="walkInButton" type="button"
                                 onclick="openWalkInModal()">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -321,6 +332,11 @@
                                 Nouvelle arrivée
                             </button>
                         </div>
+                    </div>
+                    <div class="table-tools">
+                        <label class="table-search-label" for="reservationsSearch">Rechercher une réservation</label>
+                        <input class="form-input" id="reservationsSearch" data-table-search="reservationsTable" type="search" placeholder="Nom, téléphone, chambre…">
+                        <div class="table-pagination" data-table-pagination="reservationsTable" aria-live="polite"></div>
                     </div>
                     <table>
                         <thead>
@@ -349,6 +365,12 @@
                             Commandes
                         </h3>
                         <span class="badge badge-warning" id="pendingOrdersCount">0 en attente</span>
+                    </div>
+                    <div class="table-tools">
+                        <label class="table-search-label" for="ordersSearch">Rechercher une commande</label>
+                        <input class="form-input" id="ordersSearch" data-table-search="ordersTable" type="search" placeholder="Numéro, chambre, statut…">
+                        <div class="table-pagination" data-table-pagination="ordersTable" aria-live="polite"></div>
+                        <button class="btn btn-secondary" type="button" id="refreshOrdersButton">Actualiser</button>
                     </div>
                     <table>
                         <thead>
@@ -421,7 +443,7 @@
             </div>
 
             <!-- Activity Log -->
-            <div class="table-container" style="margin-top: 24px;">
+            <div class="table-container" id="activitySection" style="margin-top: 24px;">
                 <div class="table-header">
                     <h3>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -433,6 +455,11 @@
                         Historique des Actions
                     </h3>
                     <span class="badge badge-neutral" id="activityCount">0 action</span>
+                </div>
+                <div class="table-tools">
+                    <label class="table-search-label" for="activitySearch">Rechercher dans l’historique</label>
+                    <input class="form-input" id="activitySearch" data-table-search="activityTable" type="search" placeholder="Action, détail, utilisateur…">
+                    <div class="table-pagination" data-table-pagination="activityTable" aria-live="polite"></div>
                 </div>
                 <table>
                     <thead>
@@ -476,6 +503,7 @@
                         <select class="form-select" id="walkInRoom" name="roomId" required>
                             <option value="">Choisir une chambre</option>
                         </select>
+                        <p id="walkInAvailabilityStatus" class="room-search-status" role="status" aria-live="polite"></p>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
@@ -528,6 +556,7 @@
     <script src="js/storage.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/accounting.js"></script>
+    <script src="js/shared-operations.js"></script>
     <script src="js/user-admin.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/navigation.js"></script>

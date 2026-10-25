@@ -3,6 +3,8 @@
 // ===========================================
 
 let currentUser = null;
+let walkInAvailabilityRequestId = 0;
+let walkInAvailableRooms = [];
 
 function toggleMenu() {
     document.getElementById('navMenu').classList.toggle('open');
@@ -22,6 +24,12 @@ async function checkAuth() {
     const isBarManager = currentUser.role === 'bar_manager';
     const isHotelManager = currentUser.role === 'hotel_manager';
     const isSuperAdmin = currentUser.role === 'super_admin';
+    if (isHotelManager || isBarManager) {
+        const container = document.querySelector('.main-content > .container');
+        const accountingSection = document.getElementById('accountingSection');
+        const activitySection = document.getElementById('activitySection');
+        container.insertBefore(accountingSection, activitySection.nextSibling);
+    }
     document.getElementById('walkInButton').style.display = isHotelManager ? '' : 'none';
 
     // Show user badge
@@ -60,6 +68,7 @@ async function checkAuth() {
         document.getElementById('roomStatusSection').style.display = 'none';
         document.getElementById('ordersSection').style.display = 'block';
         document.getElementById('stockSection').style.display = 'block';
+        document.getElementById('activitySection').style.display = 'none';
     }
 
     if (isHotelManager) {
@@ -71,6 +80,10 @@ async function checkAuth() {
     // Hide action columns for owner
     document.querySelectorAll('.staff-only').forEach(el => {
         el.style.display = isOwner ? 'none' : '';
+    });
+    document.querySelectorAll('.dashboard-jump-links a').forEach(link => {
+        const target = document.querySelector(link.getAttribute('href'));
+        link.hidden = !target || target.hidden || target.style.display === 'none';
     });
 
     document.body.classList.remove('auth-pending');
@@ -194,7 +207,12 @@ function renderOwnerRoomSnapshot() {
 }
 
 function renderReservations() {
-    const reservations = getReservations().filter(r => ['requested', 'active', 'checked_in'].includes(r.status));
+    const reservations = getReservations()
+        .filter(r => ['requested', 'active', 'checked_in'].includes(r.status))
+        .sort((a, b) => {
+            const priority = { requested: 0, active: 1, checked_in: 2 };
+            return priority[a.status] - priority[b.status] || a.checkIn.localeCompare(b.checkIn);
+        });
     const tbody = document.getElementById('reservationsTable');
     const isOwner = currentUser && currentUser.role === 'owner';
     document.getElementById('pendingReservationsCount').textContent = `${reservations.filter(r => r.status === 'requested').length} à confirmer`;
@@ -254,8 +272,11 @@ function renderOrders() {
     const pendingCount = orders.filter(o => o.status === 'pending').length;
     document.getElementById('pendingOrdersCount').textContent = `${pendingCount} en attente`;
 
-    // Show only recent orders (last 10)
-    const recent = orders.slice(-10).reverse();
+    const recent = [...orders].sort((a, b) => {
+        if (a.status === 'pending' && b.status !== 'pending') return -1;
+        if (b.status === 'pending' && a.status !== 'pending') return 1;
+        return new Date(b.createdAt) - new Date(a.createdAt);
+    });
 
     if (recent.length === 0) {
         tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: var(--text-secondary);">Aucune commande</td></tr>`;
@@ -308,10 +329,10 @@ function renderRooms() {
             </td>
             ${canUpdateRoomStatus ? `
             <td>
-                <select onchange="doChangeRoomStatus(${room.id}, this.value)" class="form-select" style="padding: 6px 10px; font-size: 0.8rem; width: auto;">
-                    <option value="available" ${room.status === 'available' ? 'selected' : ''}>Disponible</option>
-                    <option value="occupied" ${room.status === 'occupied' ? 'selected' : ''}>Occupée</option>
-                    <option value="maintenance" ${room.status === 'maintenance' ? 'selected' : ''}>Indisponible</option>
+                <select onchange="doChangeRoomStatus(${room.id}, this.value)" class="form-select" aria-label="Disponibilité de la chambre ${escapeHtml(room.number)}" style="padding: 6px 10px; font-size: 0.8rem; width: auto;">
+                    ${room.status === 'occupied' ? '<option value="occupied" selected disabled>Occupée</option>' : ''}
+                    <option value="available" ${room.status === 'available' ? 'selected' : ''} ${room.status === 'occupied' ? 'disabled' : ''}>Disponible</option>
+                    <option value="maintenance" ${room.status === 'maintenance' ? 'selected' : ''} ${room.status === 'occupied' ? 'disabled' : ''}>Indisponible</option>
                 </select>
             </td>
             ` : '<td>-</td>'}
@@ -459,30 +480,55 @@ function openWalkInModal() {
     requestAnimationFrame(() => document.getElementById('walkInGuestName').focus());
 }
 
-function refreshWalkInRooms(selectedRoomId = '') {
+async function refreshWalkInRooms(selectedRoomId = '') {
     const roomSelect = document.getElementById('walkInRoom');
     const today = getLocalDateString(new Date());
-    const tomorrowDate = new Date();
-    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-    const tomorrow = getLocalDateString(tomorrowDate);
-    const availableRooms = getAvailableRoomsForDates(today, tomorrow)
-        .filter(room => room.status === 'available');
+    const checkOut = document.getElementById('walkInCheckOut').value;
+    const requestId = ++walkInAvailabilityRequestId;
+    const submitButton = document.getElementById('walkInSubmit');
+    const status = document.getElementById('walkInAvailabilityStatus');
+
+    submitButton.disabled = true;
+    status.textContent = 'Vérification des disponibilités…';
+    roomSelect.replaceChildren(new Option('Chargement des chambres…', ''));
+    walkInAvailableRooms = [];
+    updateWalkInEstimate();
+
+    try {
+        const remoteRooms = await getSharedRoomAvailability(today, checkOut);
+        if (requestId !== walkInAvailabilityRequestId) return;
+        walkInAvailableRooms = remoteRooms.filter(room => room.available).map(remoteRoom => {
+            const localRoom = getRoomByNumber(remoteRoom.room_number);
+            if (!localRoom) throw new Error(`La chambre ${remoteRoom.room_number} manque dans le catalogue local.`);
+            return { ...localRoom, price: Number(remoteRoom.nightly_rate), capacity: remoteRoom.capacity };
+        });
+    } catch (error) {
+        if (requestId !== walkInAvailabilityRequestId) return;
+        console.error('Impossible de vérifier les chambres disponibles :', error);
+        status.textContent = error.message || 'Les disponibilités ne peuvent pas être vérifiées. Réessayez.';
+        roomSelect.replaceChildren(new Option('Disponibilités indisponibles', ''));
+        updateWalkInEstimate();
+        return;
+    }
 
     roomSelect.replaceChildren(new Option(
-        availableRooms.length ? 'Choisir une chambre' : 'Aucune chambre disponible aujourd’hui',
+        walkInAvailableRooms.length ? 'Choisir une chambre' : 'Aucune chambre disponible sur ces dates',
         ''
     ));
-    availableRooms.forEach(room => {
+    walkInAvailableRooms.forEach(room => {
         roomSelect.add(new Option(
             `Chambre ${room.number} · ${getTypeLabel(room.type)} · ${formatPrice(room.price)}/nuit`,
             room.id
         ));
     });
-    if (availableRooms.some(room => String(room.id) === String(selectedRoomId))) {
+    if (walkInAvailableRooms.some(room => String(room.id) === String(selectedRoomId))) {
         roomSelect.value = String(selectedRoomId);
     }
 
-    document.getElementById('walkInSubmit').disabled = availableRooms.length === 0;
+    submitButton.disabled = walkInAvailableRooms.length === 0;
+    status.textContent = walkInAvailableRooms.length
+        ? `${walkInAvailableRooms.length} chambre(s) disponible(s) pour la période.`
+        : 'Aucune chambre disponible sur ces dates.';
     updateWalkInEstimate();
 }
 
@@ -492,7 +538,7 @@ function closeWalkInModal() {
 }
 
 function updateWalkInEstimate() {
-    const room = getRoomById(Number(document.getElementById('walkInRoom').value));
+    const room = walkInAvailableRooms.find(item => item.id === Number(document.getElementById('walkInRoom').value));
     const checkOut = document.getElementById('walkInCheckOut').value;
     const guests = document.getElementById('walkInGuests');
     const estimate = document.getElementById('walkInEstimate');
@@ -519,44 +565,38 @@ function updateWalkInEstimate() {
     estimate.hidden = false;
 }
 
-function submitWalkIn(event) {
+async function submitWalkIn(event) {
     event.preventDefault();
     if (!canPerformAction('create_reservation') || currentUser.role !== 'hotel_manager') {
         showAppAlert('Action non autorisée');
         return;
     }
 
-    const reservation = checkInWalkInReservation({
-        roomId: document.getElementById('walkInRoom').value,
-        guestName: document.getElementById('walkInGuestName').value,
-        guestPhone: document.getElementById('walkInGuestPhone').value,
-        checkOut: document.getElementById('walkInCheckOut').value,
-        guests: document.getElementById('walkInGuests').value
-    }, currentUser);
-
-    if (!reservation) {
-        showAppAlert('Impossible d’attribuer cette chambre. Vérifiez ses disponibilités, la date de départ et le nombre de personnes.');
-        refreshWalkInRooms();
-        return;
+    const form = document.getElementById('walkInForm');
+    const button = document.getElementById('walkInSubmit');
+    button.disabled = true;
+    try {
+        const result = await createSharedWalkInReservation({
+            roomNumber: getRoomById(Number(form.elements.roomId.value))?.number,
+            guestName: form.elements.guestName.value.trim(),
+            guestPhone: form.elements.guestPhone.value.trim(),
+            checkOut: form.elements.checkOut.value,
+            guests: Number(form.elements.guests.value)
+        });
+        const reservation = getReservationById(Number(result.reservation_id));
+        const room = reservation && getRoomById(reservation.roomId);
+        closeWalkInModal();
+        renderAll();
+        await showAppAlert(`Arrivée enregistrée${room ? ` pour la chambre ${room.number}` : ''}.`, { title: 'Arrivée enregistrée' });
+    } catch (error) {
+        console.error('Échec de création de l’arrivée partagée :', error);
+        await showAppAlert(error.message || 'Impossible d’attribuer cette chambre. Vérifiez la disponibilité et réessayez.');
+        await loadSharedReservations().then(renderAll).catch(refreshError => {
+            console.error('Impossible d’actualiser les réservations après échec :', refreshError);
+        });
+    } finally {
+        button.disabled = walkInAvailableRooms.length === 0;
     }
-
-    const room = getRoomById(reservation.roomId);
-    logAction('CHECKIN_WALK_IN', `Arrivée sans réservation — ${reservation.guestName}`, {
-        guestName: reservation.guestName,
-        guestPhone: reservation.guestPhone,
-        roomNumber: room.number,
-        roomType: getTypeLabel(room.type),
-        nightlyRate: room.price,
-        checkIn: reservation.checkIn,
-        checkOut: reservation.checkOut,
-        guests: reservation.guests,
-        totalPrice: reservation.totalPrice,
-        reservationId: reservation.id,
-        toStatus: reservation.status
-    });
-    closeWalkInModal();
-    renderAll();
-    showAppAlert(`Arrivée enregistrée pour ${reservation.guestName}, chambre ${room.number}.`);
 }
 
 // Staff actions
@@ -568,9 +608,16 @@ async function doCheckout(reservationId) {
 
     if (await showAppConfirm('Confirmer le check-out ?', { title: 'Enregistrer le départ' })) {
         const reservation = getReservationById(reservationId);
-        if (!completeReservation(reservationId) || !reservation) {
-            showAppAlert('Impossible d’enregistrer le départ : le séjour est introuvable ou déjà terminé.');
+        if (!reservation) {
+            await showAppAlert('Impossible d’enregistrer le départ : le séjour est introuvable ou déjà terminé.');
             renderAll();
+            return;
+        }
+        try {
+            await manageSharedReservation(reservationId, 'completed');
+        } catch (error) {
+            console.error('Échec du check-out partagé :', error);
+            await showAppAlert(error.message || 'Le départ n’a pas été enregistré. Réessayez.');
             return;
         }
         const room = getRoomById(reservation.roomId);
@@ -592,15 +639,22 @@ async function doCheckout(reservationId) {
     }
 }
 
-function doCheckin(reservationId) {
+async function doCheckin(reservationId) {
     if (!canPerformAction('checkin')) {
         showAppAlert('Action non autorisée');
         return;
     }
 
-    const reservation = checkInReservation(reservationId);
+    const reservation = getReservationById(reservationId);
     if (!reservation) {
-        showAppAlert('Le check-in est impossible : vérifiez les dates et la disponibilité de la chambre.');
+        showAppAlert('Le check-in est impossible : réservation introuvable.');
+        return;
+    }
+    try {
+        await manageSharedReservation(reservationId, 'checked_in');
+    } catch (error) {
+        console.error('Échec du check-in partagé :', error);
+        await showAppAlert(error.message || 'Le check-in n’a pas été enregistré.');
         return;
     }
 
@@ -617,21 +671,28 @@ function doCheckin(reservationId) {
         totalPrice: reservation.totalPrice,
         reservationId: reservation.id,
         fromStatus: 'active',
-        toStatus: reservation.status
+        toStatus: 'checked_in'
     });
     renderAll();
 }
 
-function doConfirmReservation(reservationId) {
+async function doConfirmReservation(reservationId) {
     if (!canPerformAction('confirm_reservation')) {
         showAppAlert('Action non autorisée');
         return;
     }
 
-    const reservation = confirmReservation(reservationId);
+    const reservation = getReservationById(reservationId);
     if (!reservation) {
-        showAppAlert('Impossible de confirmer : la chambre est déjà réservée ou indisponible pour ces dates.');
-        renderAll();
+        showAppAlert('Réservation introuvable.');
+        return;
+    }
+    try {
+        await manageSharedReservation(reservationId, 'active');
+    } catch (error) {
+        console.error('Échec de confirmation partagée :', error);
+        await showAppAlert(error.message || 'Impossible de confirmer cette réservation.');
+        await loadSharedReservations().then(renderAll);
         return;
     }
 
@@ -661,9 +722,16 @@ async function doCancelReservation(reservationId) {
 
     if (await showAppConfirm('Annuler cette réservation ?', { title: 'Annuler la réservation' })) {
         const reservation = getReservationById(reservationId);
-        if (!cancelReservation(reservationId) || !reservation) {
+        if (!reservation) {
             showAppAlert('Impossible d’annuler : la réservation est introuvable ou déjà terminée.');
             renderAll();
+            return;
+        }
+        try {
+            await manageSharedReservation(reservationId, 'cancelled');
+        } catch (error) {
+            console.error('Échec de l’annulation partagée :', error);
+            await showAppAlert(error.message || 'Impossible d’annuler cette réservation.');
             return;
         }
         const room = getRoomById(reservation.roomId);
@@ -684,15 +752,22 @@ async function doCancelReservation(reservationId) {
     }
 }
 
-function doValidateOrder(orderId) {
+async function doValidateOrder(orderId) {
     if (!canPerformAction('validate_order')) {
         showAppAlert('Action non autorisée');
         return;
     }
 
-    const order = updateOrderStatus(orderId, 'completed', currentUser);
+    const order = getOrders().find(item => item.id === orderId);
     if (!order) {
         showAppAlert('Commande introuvable.');
+        return;
+    }
+    try {
+        await manageSharedOrder(orderId, 'completed');
+    } catch (error) {
+        console.error('Échec de validation de commande :', error);
+        await showAppAlert(error.message || 'La commande n’a pas pu être validée.');
         return;
     }
     logAction('ORDER_VALIDATE', `Commande #${orderId} validée`, getOrderActivityDetails(order));
@@ -706,9 +781,16 @@ async function doCancelOrder(orderId) {
     }
 
     if (await showAppConfirm('Annuler cette commande ?', { title: 'Annuler la commande' })) {
-        const order = updateOrderStatus(orderId, 'cancelled', currentUser);
+        const order = getOrders().find(item => item.id === orderId);
         if (!order) {
             showAppAlert('Commande introuvable.');
+            return;
+        }
+        try {
+            await manageSharedOrder(orderId, 'cancelled');
+        } catch (error) {
+            console.error('Échec de l’annulation de commande :', error);
+            await showAppAlert(error.message || 'La commande n’a pas pu être annulée.');
             return;
         }
         logAction('ORDER_CANCEL', `Commande #${orderId} annulée`, getOrderActivityDetails(order));
@@ -716,7 +798,7 @@ async function doCancelOrder(orderId) {
     }
 }
 
-function doChangeRoomStatus(roomId, status) {
+async function doChangeRoomStatus(roomId, status) {
     if (!canPerformAction('update_room_status')) {
         showAppAlert('Action non autorisée');
         renderAll();
@@ -724,24 +806,33 @@ function doChangeRoomStatus(roomId, status) {
     }
 
     const room = getRoomById(roomId);
-    if (!room || !['available', 'occupied', 'maintenance'].includes(status)) {
+    if (!room || !['available', 'maintenance'].includes(status)) {
         showAppAlert('Impossible de modifier l’état de cette chambre.');
         renderAll();
         return;
     }
+    const maintenance = status === 'maintenance';
     const previousStatus = room.status;
-    if (previousStatus === status) return;
-    updateRoom(roomId, { status });
-    logAction('ROOM_STATUS', `État de la chambre ${room.number} modifié`, {
-        roomNumber: room.number,
-        roomType: getTypeLabel(room.type),
-        fromStatus: previousStatus,
-        toStatus: status
-    });
-    renderAll();
+    if ((previousStatus === 'maintenance') === maintenance) return;
+    try {
+        await setSharedRoomMaintenance(room.number, maintenance);
+        logAction('ROOM_STATUS', `État de la chambre ${room.number} modifié`, {
+            roomNumber: room.number,
+            roomType: getTypeLabel(room.type),
+            fromStatus: previousStatus,
+            toStatus: maintenance ? 'maintenance' : 'available'
+        });
+        renderAll();
+    } catch (error) {
+        console.error('Échec de mise à jour de la disponibilité de la chambre :', error);
+        await showAppAlert(error.message || 'La disponibilité de la chambre n’a pas été modifiée.');
+        await loadSharedRoomStatuses().then(renderAll).catch(refreshError => {
+            console.error('Impossible de recharger les états des chambres :', refreshError);
+        });
+    }
 }
 
-function doRestock(beverageId) {
+async function doRestock(beverageId) {
     if (!canPerformAction('restock')) {
         showAppAlert('Action non autorisée');
         return;
@@ -749,16 +840,20 @@ function doRestock(beverageId) {
 
     const bev = getBeverageById(beverageId);
     if (bev) {
-        const newStock = bev.stock + 10;
-        updateBeverage(beverageId, { stock: newStock });
-        logAction('STOCK_UPDATE', `Stock de ${bev.name} réapprovisionné`, {
+        try {
+            await restockSharedBeverage(beverageId, 10);
+            logAction('STOCK_UPDATE', `Stock de ${bev.name} réapprovisionné`, {
             beverageName: bev.name,
             category: getCategoryLabel(bev.category),
             previousStock: bev.stock,
             addedStock: 10,
-            newStock
+            newStock: bev.stock + 10
         });
-        renderAll();
+            renderAll();
+        } catch (error) {
+            console.error('Échec du réapprovisionnement partagé :', error);
+            await showAppAlert(error.message || 'Le stock n’a pas été mis à jour.');
+        }
     }
 }
 
@@ -776,11 +871,78 @@ function getOrderActivityDetails(order) {
     };
 }
 
+const dashboardTablePages = new Map();
+
+function applyDashboardTableTools(tableId) {
+    const tbody = document.getElementById(tableId);
+    const search = document.querySelector(`[data-table-search="${tableId}"]`);
+    const pagination = document.querySelector(`[data-table-pagination="${tableId}"]`);
+    if (!tbody || !search || !pagination) return;
+
+    const headers = [...tbody.closest('table').querySelectorAll('thead th')].map(header => header.textContent.trim());
+    tbody.querySelectorAll('tr').forEach(row => {
+        row.querySelectorAll('td').forEach((cell, index) => {
+            if (headers[index]) cell.dataset.label = headers[index];
+        });
+    });
+    const query = search.value.trim().toLocaleLowerCase('fr');
+    const rows = [...tbody.querySelectorAll('tr')];
+    const filtered = rows.filter(row => row.textContent.toLocaleLowerCase('fr').includes(query));
+    const pageSize = 10;
+    const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+    const page = Math.min(dashboardTablePages.get(tableId) || 1, pageCount);
+    dashboardTablePages.set(tableId, page);
+    rows.forEach(row => { row.hidden = true; });
+    filtered.slice((page - 1) * pageSize, page * pageSize).forEach(row => { row.hidden = false; });
+
+    const rangeStart = filtered.length ? (page - 1) * pageSize + 1 : 0;
+    const rangeEnd = Math.min(page * pageSize, filtered.length);
+    pagination.innerHTML = `
+        <span>${rangeStart}–${rangeEnd} sur ${filtered.length}</span>
+        <button type="button" class="btn btn-secondary" data-page-step="-1" ${page <= 1 ? 'disabled' : ''} aria-label="Page précédente">Précédent</button>
+        <span>Page ${page} / ${pageCount}</span>
+        <button type="button" class="btn btn-secondary" data-page-step="1" ${page >= pageCount ? 'disabled' : ''} aria-label="Page suivante">Suivant</button>`;
+    pagination.querySelectorAll('[data-page-step]').forEach(button => {
+        button.addEventListener('click', () => {
+            dashboardTablePages.set(tableId, page + Number(button.dataset.pageStep));
+            applyDashboardTableTools(tableId);
+        });
+    });
+}
+
+function initDashboardTableTools() {
+    document.querySelectorAll('[data-table-search]').forEach(input => {
+        input.addEventListener('input', () => {
+            dashboardTablePages.set(input.dataset.tableSearch, 1);
+            applyDashboardTableTools(input.dataset.tableSearch);
+        });
+        applyDashboardTableTools(input.dataset.tableSearch);
+    });
+}
+
+async function refreshSharedOperations() {
+    const jobs = [];
+    if (['owner', 'hotel_manager'].includes(currentUser.role)) {
+        jobs.push(loadSharedReservations(), loadSharedRoomStatuses());
+    }
+    if (['hotel_manager', 'bar_manager'].includes(currentUser.role)) {
+        jobs.push(loadSharedOrders(), loadSharedBeverageStock());
+    }
+    await Promise.all(jobs);
+    renderAll();
+    document.getElementById('sharedOperationsStatus').textContent =
+        `Données actualisées à ${new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Lome' }).format(new Date())}.`;
+}
+
 function renderAll() {
     renderStats();
-    renderReservations();
-    renderRooms();
-    renderActivityLog();
+    if (['owner', 'hotel_manager'].includes(currentUser.role)) renderReservations();
+    else {
+        document.getElementById('reservationsTable').replaceChildren();
+        document.getElementById('pendingReservationsCount').textContent = '0 à confirmer';
+    }
+    if (currentUser.role === 'hotel_manager') renderRooms();
+    if (currentUser.role !== 'bar_manager') renderActivityLog();
 
     // Render these for managers
     const canViewOrders = canPerformAction('view_orders');
@@ -788,6 +950,7 @@ function renderAll() {
         renderOrders();
         renderStock();
     }
+    ['reservationsTable', 'ordersTable', 'activityTable'].forEach(applyDashboardTableTools);
 }
 
 // Initialize
@@ -798,8 +961,36 @@ document.addEventListener('DOMContentLoaded', async function () {
             return;
         }
         document.getElementById('walkInRoom').addEventListener('change', updateWalkInEstimate);
+        document.getElementById('walkInCheckOut').addEventListener('change', () => {
+            refreshWalkInRooms(document.getElementById('walkInRoom').value);
+        });
         document.getElementById('walkInCheckOut').addEventListener('change', updateWalkInEstimate);
-        renderAll();
-        await initAccounting();
+        try {
+            document.getElementById('refreshReservationsButton').addEventListener('click', () => {
+                refreshSharedOperations().catch(error => {
+                    console.error('Impossible d’actualiser les réservations :', error);
+                    document.getElementById('sharedOperationsStatus').textContent = error.message || 'Échec de l’actualisation.';
+                });
+            });
+            document.getElementById('refreshOrdersButton').addEventListener('click', () => {
+                refreshSharedOperations().catch(error => {
+                    console.error('Impossible d’actualiser les commandes :', error);
+                    document.getElementById('sharedOperationsStatus').textContent = error.message || 'Échec de l’actualisation.';
+                });
+            });
+            await refreshSharedOperations();
+            await initAccounting();
+            initDashboardTableTools();
+            window.setInterval(() => {
+                refreshSharedOperations().catch(error => {
+                    console.error('Actualisation automatique des opérations partagées échouée :', error);
+                    document.getElementById('sharedOperationsStatus').textContent =
+                        error.message || 'Échec de la synchronisation automatique. Utilisez Actualiser pour réessayer.';
+                });
+            }, 60000);
+        } catch (error) {
+            console.error('Impossible de charger les données partagées du tableau de bord :', error);
+            await showAppAlert(error.message || 'Les données de gestion n’ont pas pu être chargées. Vérifiez que la migration Supabase des opérations partagées est appliquée.');
+        }
     }
 });

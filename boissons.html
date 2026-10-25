@@ -25,7 +25,7 @@
                             d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
                     </svg>
                 </div>
-                <h1>Hôtel</h1>
+                <span>Hôtel</span>
             </a>
             <button class="menu-toggle" onclick="toggleMenu()" aria-controls="navMenu" aria-expanded="false" aria-label="Ouvrir le menu de navigation"><span></span><span></span><span></span></button>
             <ul class="navbar-menu" id="navMenu">
@@ -45,6 +45,7 @@
                         </svg>
                         Chambres
                     </a></li>
+                <li><a href="boissons.html" class="active">Bar / Boissons</a></li>
                 <li><a href="index.html#services">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor">
@@ -66,14 +67,15 @@
 
     <main class="main-content">
         <div class="container">
+            <p class="room-search-status" id="beverageSyncStatus" role="status" aria-live="polite"></p>
             <div class="filter-bar">
                 <div class="filter-group">
                     <label>Catégorie :</label>
                     <div class="filter-tabs">
-                        <button class="filter-tab active" onclick="filterCategory('all')">Toutes</button>
-                        <button class="filter-tab" onclick="filterCategory('beer')">Bières</button>
-                        <button class="filter-tab" onclick="filterCategory('soda')">Boissons sans alcool</button>
-                        <button class="filter-tab" onclick="filterCategory('water')">Eau</button>
+                        <button class="filter-tab active" type="button" aria-pressed="true" onclick="filterCategory('all')">Toutes</button>
+                        <button class="filter-tab" type="button" aria-pressed="false" onclick="filterCategory('beer')">Bières</button>
+                        <button class="filter-tab" type="button" aria-pressed="false" onclick="filterCategory('soda')">Boissons sans alcool</button>
+                        <button class="filter-tab" type="button" aria-pressed="false" onclick="filterCategory('water')">Eau</button>
                     </div>
                 </div>
                 <span class="filter-count" id="beverageCount">0 références</span>
@@ -96,7 +98,7 @@
 
     <!-- Cart sidebar -->
     <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
-    <div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-sidebar" id="cartSidebar" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
         <div class="cart-header">
             <h3>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -104,9 +106,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                 </svg>
-                Votre Panier
+                <span id="cartTitle">Votre Panier</span>
             </h3>
-            <button class="cart-close" onclick="closeCart()">
+            <button class="cart-close" type="button" aria-label="Fermer le panier" onclick="closeCart()">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -126,11 +128,11 @@
     </div>
 
     <!-- Order Modal -->
-    <div class="modal-overlay" id="orderModal">
-        <div class="modal">
+    <div class="modal-overlay" id="orderModal" role="presentation">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle">
             <div class="modal-header">
-                <h3>Finaliser la Commande</h3>
-                <button class="cart-close" onclick="closeOrderModal()">
+                <h3 id="orderModalTitle">Finaliser la commande</h3>
+                <button class="cart-close" type="button" aria-label="Fermer la fenêtre" onclick="closeOrderModal()">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -140,13 +142,16 @@
             <form id="orderForm" onsubmit="submitOrder(event)">
                 <div class="modal-body">
                     <div class="form-group">
-                        <label class="form-label">Numéro de chambre *</label>
-                        <select class="form-select" id="orderRoom" required>
-                            <option value="">Sélectionner une chambre...</option>
-                        </select>
+                        <label class="form-label" for="orderRoom">Numéro de chambre *</label>
+                        <input class="form-input" id="orderRoom" name="roomNumber" required maxlength="20" autocomplete="off" placeholder="Ex. 101 ou A01">
                     </div>
+                    <div class="form-group">
+                        <label class="form-label" for="orderGuestPhone">Téléphone associé au séjour *</label>
+                        <input class="form-input" id="orderGuestPhone" name="guestPhone" type="tel" required minlength="8" maxlength="40" autocomplete="tel">
+                    </div>
+                    <p id="orderRoomStatus" class="room-search-status" role="status" aria-live="polite">La chambre et le téléphone seront vérifiés avant l’envoi.</p>
                     <div style="background: var(--bg-surface); border-radius: 8px; padding: 14px;">
-                        <p style="color: var(--text-secondary); margin-bottom: 4px; font-size: 0.85rem;">Total à payer
+                        <p style="color: var(--text-secondary); margin-bottom: 4px; font-size: 0.85rem;">Total de la commande
                         </p>
                         <p style="font-size: 1.25rem; font-weight: 700; color: var(--brand-navy); margin-bottom: 0;">
                             <span id="orderTotal">0 FCFA</span>
@@ -173,6 +178,9 @@
 
     <script src="js/dialogs.js"></script>
     <script src="js/storage.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/shared-operations.js"></script>
     <script src="js/boissons.js"></script>
     <script src="js/navigation.js"></script>
 </body>

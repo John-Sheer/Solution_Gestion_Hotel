@@ -666,12 +666,24 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="password">Mot de passe</label>
+                        <div class="password-input-wrap">
                         <input type="password" class="form-input" id="password" required
                             placeholder="Entrez votre mot de passe" autocomplete="current-password">
+                        <button class="password-visibility-toggle" type="button" id="togglePassword" aria-pressed="false">Afficher</button>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-primary">
                         Se connecter
                     </button>
+                </form>
+                <button class="forgot-password-link" id="forgotPasswordButton" type="button">Mot de passe oublié ?</button>
+                <p id="passwordRecoveryStatus" class="password-recovery-status" role="status" aria-live="polite"></p>
+                <form class="login-form" id="passwordResetForm" hidden>
+                    <div class="form-group">
+                        <label class="form-label" for="newPassword">Nouveau mot de passe</label>
+                        <input type="password" class="form-input" id="newPassword" required minlength="8" autocomplete="new-password">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Mettre à jour le mot de passe</button>
                 </form>
 
 
@@ -704,12 +716,90 @@
         }
 
         // Rediriger uniquement après vérification de la session et du profil côté Supabase.
-        isAuthenticated().then(user => {
-            if (user) window.location.replace('admin.html');
-        }).catch(error => {
-            console.error('Impossible de vérifier la session Supabase :', error);
-            document.getElementById('errorMessage').textContent = error.message || 'Impossible de vérifier la session.';
-            document.getElementById('loginError').classList.add('show');
+        let passwordResetMode = new URLSearchParams(window.location.search).get('password-reset') === '1'
+            || new URLSearchParams(window.location.hash.slice(1)).get('type') === 'recovery';
+        if (window.hotelSupabaseClient) {
+            window.hotelSupabaseClient.auth.onAuthStateChange(event => {
+                if (event !== 'PASSWORD_RECOVERY') return;
+                passwordResetMode = true;
+                document.getElementById('loginForm').hidden = true;
+                document.getElementById('forgotPasswordButton').hidden = true;
+                document.getElementById('passwordResetForm').hidden = false;
+                document.querySelector('.login-form-side h2').textContent = 'Nouveau mot de passe';
+                document.querySelector('.login-form-side .subtitle').textContent = 'Choisissez un mot de passe sécurisé pour votre compte.';
+            });
+        }
+        if (passwordResetMode) {
+            document.getElementById('loginForm').hidden = true;
+            document.getElementById('forgotPasswordButton').hidden = true;
+            document.getElementById('passwordResetForm').hidden = false;
+            document.querySelector('.login-form-side h2').textContent = 'Nouveau mot de passe';
+            document.querySelector('.login-form-side .subtitle').textContent = 'Choisissez un mot de passe sécurisé pour votre compte.';
+        } else {
+            isAuthenticated().then(user => {
+                if (user) window.location.replace('admin.html');
+            }).catch(error => {
+                console.error('Impossible de vérifier la session Supabase :', error);
+                document.getElementById('errorMessage').textContent = error.message || 'Impossible de vérifier la session.';
+                document.getElementById('loginError').classList.add('show');
+            });
+        }
+
+        document.getElementById('togglePassword').addEventListener('click', event => {
+            const password = document.getElementById('password');
+            const visible = password.type === 'password';
+            password.type = visible ? 'text' : 'password';
+            event.currentTarget.textContent = visible ? 'Masquer' : 'Afficher';
+            event.currentTarget.setAttribute('aria-pressed', String(visible));
+        });
+
+        document.getElementById('forgotPasswordButton').addEventListener('click', async event => {
+            const emailInput = document.getElementById('username');
+            const status = document.getElementById('passwordRecoveryStatus');
+            if (!emailInput.checkValidity()) {
+                emailInput.reportValidity();
+                return;
+            }
+            const button = event.currentTarget;
+            button.disabled = true;
+            status.textContent = 'Envoi de la demande…';
+            try {
+                const redirectTo = `${window.location.origin}${window.location.pathname}`;
+                const { error } = await getSupabaseClient().auth.resetPasswordForEmail(emailInput.value.trim(), { redirectTo });
+                if (error) throw error;
+                status.textContent = 'Si cette adresse correspond à un compte, un lien de réinitialisation sera envoyé.';
+            } catch (error) {
+                console.error('Échec de la demande de réinitialisation :', error);
+                status.textContent = error.message || 'Impossible d’envoyer le lien. Vérifiez les réglages e-mail et réessayez.';
+            } finally {
+                button.disabled = false;
+            }
+        });
+
+        document.getElementById('passwordResetForm').addEventListener('submit', async event => {
+            event.preventDefault();
+            const button = event.currentTarget.querySelector('button[type="submit"]');
+            const status = document.getElementById('passwordRecoveryStatus');
+            button.disabled = true;
+            try {
+                const { error } = await getSupabaseClient().auth.updateUser({
+                    password: document.getElementById('newPassword').value
+                });
+                if (error) throw error;
+                await getSupabaseClient().auth.signOut();
+                history.replaceState(null, '', window.location.pathname);
+                event.currentTarget.hidden = true;
+                document.getElementById('loginForm').hidden = false;
+                document.getElementById('forgotPasswordButton').hidden = false;
+                document.querySelector('.login-form-side h2').textContent = 'Connexion';
+                document.querySelector('.login-form-side .subtitle').textContent = 'Accédez à votre tableau de bord';
+                status.textContent = 'Mot de passe modifié. Vous pouvez maintenant vous connecter.';
+            } catch (error) {
+                console.error('Échec de la mise à jour du mot de passe :', error);
+                status.textContent = error.message || 'Le mot de passe n’a pas pu être modifié. Demandez un nouveau lien.';
+            } finally {
+                button.disabled = false;
+            }
         });
 
         async function handleLogin(event) {

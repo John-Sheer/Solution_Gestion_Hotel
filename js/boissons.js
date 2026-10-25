@@ -3,6 +3,7 @@
 // ===========================================
 
 let currentCategoryFilter = 'all';
+let stockIsSynchronized = false;
 
 function toggleMenu() {
     document.getElementById('navMenu').classList.toggle('open');
@@ -47,8 +48,8 @@ function renderBeverages() {
                 <p>${bev.description}</p>
                 <div class="beverage-footer">
                     <span class="beverage-price">${formatPrice(bev.price)}</span>
-                    <button class="btn btn-sm btn-primary" onclick="addToCartAndUpdate(${bev.id})" ${bev.stock <= 0 ? 'disabled' : ''}>
-                        ${bev.stock <= 0 ? 'Épuisé' : 'Ajouter'}
+                    <button class="btn btn-sm btn-primary" onclick="addToCartAndUpdate(${bev.id})" ${bev.stock <= 0 || !stockIsSynchronized ? 'disabled' : ''}>
+                        ${!stockIsSynchronized ? 'Stock indisponible' : bev.stock <= 0 ? 'Épuisé' : 'Ajouter'}
                     </button>
                 </div>
             </div>
@@ -61,14 +62,16 @@ function filterCategory(category) {
     const tabs = document.querySelectorAll('.filter-tab');
     tabs.forEach((tab, idx) => {
         const categories = ['all', 'beer', 'soda', 'water'];
-        tab.classList.toggle('active', categories[idx] === category);
+        const active = categories[idx] === category;
+        tab.classList.toggle('active', active);
+        tab.setAttribute('aria-pressed', String(active));
     });
     renderBeverages();
 }
 
 function addToCartAndUpdate(beverageId) {
     const beverage = getBeverageById(beverageId);
-    if (!beverage) return;
+    if (!beverage || !stockIsSynchronized) return;
     addToCart(beverage, 1);
     updateCartUI();
 }
@@ -97,7 +100,7 @@ function updateCartUI() {
         return;
     }
 
-    checkoutBtn.disabled = false;
+    checkoutBtn.disabled = !stockIsSynchronized;
     cartItems.innerHTML = cart.map(item => `
         <div class="cart-item">
             <div class="cart-item-image">
@@ -128,59 +131,102 @@ function changeQty(beverageId, delta) {
 function openCart() {
     document.getElementById('cartSidebar').classList.add('open');
     document.getElementById('cartOverlay').classList.add('open');
+    document.querySelector('#cartSidebar .cart-close').focus();
 }
 
 function closeCart() {
     document.getElementById('cartSidebar').classList.remove('open');
     document.getElementById('cartOverlay').classList.remove('open');
+    document.querySelector('.cart-toggle').focus();
 }
 
-function openOrderModal() {
+async function openOrderModal() {
     const cart = getCart();
     if (cart.length === 0) return;
+    if (!stockIsSynchronized) {
+        await showAppAlert('Le stock doit être synchronisé avant de passer une commande.');
+        return;
+    }
 
-    // Populate room options (occupied rooms)
-    const rooms = getRooms();
-    const select = document.getElementById('orderRoom');
-    select.innerHTML = '<option value="">Sélectionner une chambre...</option>';
-
-    rooms.forEach(room => {
-        const option = document.createElement('option');
-        option.value = room.number;
-        option.textContent = `Chambre ${room.number} - ${getTypeLabel(room.type)}`;
-        select.appendChild(option);
-    });
-
+    document.getElementById('orderForm').reset();
+    const status = document.getElementById('orderRoomStatus');
+    const submitButton = document.querySelector('#orderForm button[type="submit"]');
+    submitButton.disabled = !stockIsSynchronized;
+    status.textContent = 'La chambre et le téléphone seront vérifiés avant l’envoi.';
     document.getElementById('orderTotal').textContent = formatPrice(getCartTotal());
     document.getElementById('orderModal').classList.add('open');
 }
 
 function closeOrderModal() {
     document.getElementById('orderModal').classList.remove('open');
+    document.getElementById('orderForm').reset();
+    document.getElementById('orderRoomStatus').textContent =
+        'La chambre et le téléphone seront vérifiés avant l’envoi.';
 }
 
-function submitOrder(event) {
+async function submitOrder(event) {
     event.preventDefault();
 
-    const roomNumber = document.getElementById('orderRoom').value;
-    if (!roomNumber) {
-        showAppAlert('Veuillez sélectionner une chambre');
-        return;
-    }
+    const roomNumber = document.getElementById('orderRoom').value.trim();
+    const guestPhone = document.getElementById('orderGuestPhone').value.trim();
 
-    // Create order (without user - client order)
-    const order = createOrder(roomNumber, null);
-
-    if (order) {
+    const submitButton = document.querySelector('#orderForm button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = 'Envoi de la commande…';
+    try {
+        const result = await placeSharedHotelOrder(roomNumber, guestPhone, getCart());
+        clearCart();
         closeOrderModal();
         closeCart();
         updateCartUI();
-        showAppAlert('Commande envoyée ! Un serveur vous apportera votre commande.');
+        await showAppAlert(
+            `Commande n°${result.id} enregistrée. Total confirmé : ${formatPrice(result.totalPrice)}. Le personnel va la préparer.`,
+            { title: 'Commande enregistrée' }
+        );
+        try {
+            await loadSharedBeverageStock();
+            stockIsSynchronized = true;
+            document.getElementById('beverageSyncStatus').textContent = 'Stock et prix synchronisés avec le registre de l’hôtel.';
+        } catch (stockError) {
+            stockIsSynchronized = false;
+            console.error('La commande a été enregistrée, mais le stock n’a pas pu être actualisé :', stockError);
+            document.getElementById('beverageSyncStatus').textContent =
+                'Commande enregistrée. Le stock n’a pas pu être resynchronisé ; rechargez la page avant une nouvelle commande.';
+        }
+        renderBeverages();
+    } catch (error) {
+        console.error('Échec de création de commande partagée :', error);
+        await showAppAlert(error.message || 'La commande n’a pas été enregistrée. Vérifiez votre connexion puis réessayez.', { title: 'Envoi impossible' });
+        stockIsSynchronized = false;
+        try {
+            await loadSharedBeverageStock();
+            stockIsSynchronized = true;
+        } catch (stockError) {
+            console.error('Impossible de recharger le stock après l’échec :', stockError);
+            document.getElementById('beverageSyncStatus').textContent =
+                'Le stock n’a pas pu être vérifié. Rechargez la page avant de réessayer.';
+        }
+        updateCartUI();
+        renderBeverages();
+    } finally {
+        submitButton.disabled = !stockIsSynchronized;
+        submitButton.textContent = 'Confirmer';
     }
 }
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function () {
-    renderBeverages();
-    updateCartUI();
+    loadSharedBeverageStock().then(() => {
+        stockIsSynchronized = true;
+        document.getElementById('beverageSyncStatus').textContent = 'Stock et prix synchronisés avec le registre de l’hôtel.';
+        renderBeverages();
+        updateCartUI();
+    }).catch(error => {
+        stockIsSynchronized = false;
+        console.error('Impossible de charger le stock partagé :', error);
+        document.getElementById('beverageSyncStatus').textContent =
+            'Le stock partagé est momentanément indisponible. Les commandes sont désactivées pour éviter toute erreur.';
+        document.querySelectorAll('.beverage-card .btn').forEach(button => { button.disabled = true; });
+        document.getElementById('checkoutBtn').disabled = true;
+    });
 });

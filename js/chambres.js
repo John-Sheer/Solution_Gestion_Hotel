@@ -4,32 +4,71 @@
 
 let currentTypeFilter = 'all';
 let currentStatusFilter = 'all';
+let roomAvailability = [];
+let roomAvailabilityRequestId = 0;
+let selectedGuestCount = 2;
+let searchCheckIn;
+let searchCheckOut;
 
 function toggleMenu() {
     document.getElementById('navMenu').classList.toggle('open');
 }
 
-function renderRooms() {
+async function renderRooms() {
     const rooms = getRooms();
     const grid = document.getElementById('roomsGrid');
-    const today = getLocalDateString(new Date());
-    const tomorrow = getLocalDateString(new Date(Date.now() + 86400000));
-    const availableCount = getAvailableRoomsForDates(today, tomorrow).length;
+    const status = document.getElementById('roomSearchStatus');
+    const searchButton = document.querySelector('#roomSearchForm button[type="submit"]');
+    const requestId = ++roomAvailabilityRequestId;
+    searchButton.disabled = true;
+    status.textContent = 'Vérification des disponibilités…';
+    try {
+        const availability = await getSharedRoomAvailability(searchCheckIn, searchCheckOut);
+        if (requestId !== roomAvailabilityRequestId) return;
+        roomAvailability = availability;
+    } catch (error) {
+        if (requestId !== roomAvailabilityRequestId) return;
+        console.error('Impossible de vérifier les disponibilités partagées :', error);
+        status.textContent = error.message || 'Impossible de vérifier les disponibilités. Réessayez ou appelez la réception.';
+        roomAvailability = [];
+        grid.replaceChildren();
+        ['heroAvailable', 'availableRooms'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = '--';
+        });
+        searchButton.disabled = false;
+        return;
+    }
+    if (requestId !== roomAvailabilityRequestId) return;
+    searchButton.disabled = false;
+    const availableCount = roomAvailability.filter(room => room.available && room.capacity >= selectedGuestCount).length;
+    const availabilityByNumber = new Map(roomAvailability.map(room => [room.room_number, room]));
+    status.textContent = `${availableCount} chambre(s) disponible(s) pour ${selectedGuestCount} personne(s), du ${formatDate(searchCheckIn)} au ${formatDate(searchCheckOut)}.`;
 
     ['heroAvailable', 'availableRooms'].forEach(id => {
         const element = document.getElementById(id);
         if (element) element.textContent = availableCount;
     });
 
-    let filtered = rooms;
+    let filtered = rooms.map(room => {
+        const shared = availabilityByNumber.get(room.number);
+        return shared ? {
+            ...room,
+            price: Number(shared.nightly_rate),
+            capacity: shared.capacity,
+            status: shared.available ? 'available' : 'occupied'
+        } : { ...room, status: 'maintenance' };
+    });
 
     if (currentTypeFilter !== 'all') {
         filtered = filtered.filter(r => r.type === currentTypeFilter);
     }
 
     if (currentStatusFilter !== 'all') {
-        filtered = filtered.filter(r => r.status === currentStatusFilter);
+        filtered = filtered.filter(r =>
+            (currentStatusFilter === 'available' ? r.status === 'available' && r.capacity >= selectedGuestCount : true));
     }
+    filtered = filtered.filter(room => room.capacity >= selectedGuestCount);
 
     if (filtered.length === 0) {
         grid.innerHTML = `
@@ -48,7 +87,7 @@ function renderRooms() {
         <div class="room-card">
             <div class="room-card-image">
                 <img src="${room.image}" alt="${room.name}" loading="lazy">
-                <span class="room-status ${room.status}">${getStatusLabel(room.status)}</span>
+                <span class="room-status ${room.status}">${room.status === 'available' ? 'Disponible' : room.status === 'maintenance' ? 'Indisponible' : 'Complet pour ces dates'}</span>
                 <span class="room-capacity">${room.capacity} personnes</span>
             </div>
             <div class="room-card-content">
@@ -75,11 +114,21 @@ function renderRooms() {
     `).join('');
 }
 
+function getCurrentRoomData(roomId) {
+    const room = getRoomById(roomId);
+    const sharedRoom = room && roomAvailability.find(item => item.room_number === room.number);
+    return room && sharedRoom
+        ? { ...room, price: Number(sharedRoom.nightly_rate), capacity: sharedRoom.capacity }
+        : null;
+}
+
 function filterRooms(type) {
     currentTypeFilter = type;
     document.querySelectorAll('.filter-group:first-child .filter-tab').forEach((btn, idx) => {
         const categories = ['all', 'ventilated', 'air_conditioned', 'apartment'];
-        btn.classList.toggle('active', categories[idx] === type);
+        const active = categories[idx] === type;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-pressed', String(active));
     });
     renderRooms();
 }
@@ -87,16 +136,17 @@ function filterRooms(type) {
 function filterStatus(status) {
     currentStatusFilter = status;
     document.querySelectorAll('.filter-group:last-child .filter-tab').forEach((btn, idx) => {
-        btn.classList.toggle('active',
+        const active =
             (status === 'all' && idx === 0) ||
-            (status === 'available' && idx === 1)
-        );
+            (status === 'available' && idx === 1);
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-pressed', String(active));
     });
     renderRooms();
 }
 
 function openReservationModal(roomId) {
-    const room = getRoomById(roomId);
+    const room = getCurrentRoomData(roomId);
     if (!room) return;
 
     document.getElementById('selectedRoomId').value = roomId;
@@ -104,19 +154,13 @@ function openReservationModal(roomId) {
     document.getElementById('modalRoomPrice').textContent = formatPrice(room.price);
 
     // Set default dates
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    document.getElementById('checkIn').value = getLocalDateString(today);
-    document.getElementById('checkIn').min = getLocalDateString(today);
-    document.getElementById('checkOut').value = getLocalDateString(tomorrow);
-    document.getElementById('checkOut').min = getLocalDateString(tomorrow);
+    document.getElementById('checkIn').value = searchCheckIn;
+    document.getElementById('checkOut').value = searchCheckOut;
 
     document.querySelectorAll('#guestCount option').forEach(option => {
         option.disabled = Number(option.value) > room.capacity;
     });
-    document.getElementById('guestCount').value = Math.min(2, room.capacity);
+    document.getElementById('guestCount').value = Math.min(selectedGuestCount, room.capacity);
 
     calculateTotal();
 
@@ -130,7 +174,7 @@ function closeModal() {
 
 function calculateTotal() {
     const roomId = parseInt(document.getElementById('selectedRoomId').value);
-    const room = getRoomById(roomId);
+    const room = getCurrentRoomData(roomId);
     if (!room) return;
 
     const checkIn = new Date(document.getElementById('checkIn').value);
@@ -145,11 +189,11 @@ function calculateTotal() {
     }
 }
 
-function submitReservation(event) {
+async function submitReservation(event) {
     event.preventDefault();
 
     const roomId = parseInt(document.getElementById('selectedRoomId').value);
-    const room = getRoomById(roomId);
+    const room = getCurrentRoomData(roomId);
 
     const checkIn = new Date(document.getElementById('checkIn').value);
     const checkOut = new Date(document.getElementById('checkOut').value);
@@ -165,48 +209,56 @@ function submitReservation(event) {
         showAppAlert(`Cette chambre peut accueillir au maximum ${room.capacity} personne(s).`);
         return;
     }
-    if (!isRoomAvailableForDates(roomId, checkInValue, checkOutValue)) {
-        showAppAlert('Cette chambre n’est pas disponible pour ces dates. Choisissez une autre période ou une autre chambre.');
-        return;
+    const submitButton = document.querySelector('#reservationForm button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = 'Envoi de la demande…';
+    try {
+        const result = await createSharedReservation({
+            roomNumber: room.number,
+            guestName: document.getElementById('guestName').value,
+            guestPhone: document.getElementById('guestPhone').value,
+            checkIn: checkInValue,
+            checkOut: checkOutValue,
+            guests
+        });
+        closeModal();
+        await renderRooms();
+        await showAppAlert(
+            `Demande n°${result.reservation_id} reçue. Estimation : ${formatPrice(Number(result.total_price))}. La réservation reste à confirmer par la réception.`,
+            { title: 'Demande enregistrée' }
+        );
+    } catch (error) {
+        console.error('Échec de création de la demande partagée :', error);
+        await showAppAlert(error.message || 'La demande n’a pas pu être enregistrée. Vérifiez votre connexion et réessayez.', { title: 'Envoi impossible' });
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Envoyer la demande';
     }
-
-    const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
-
-    const reservation = {
-        roomId: roomId,
-        guestName: document.getElementById('guestName').value,
-        guestPhone: document.getElementById('guestPhone').value,
-        checkIn: document.getElementById('checkIn').value,
-        checkOut: document.getElementById('checkOut').value,
-        guests,
-        totalPrice: nights * room.price,
-        status: 'requested'
-    };
-
-    // For client reservations, mark as pending (will be confirmed by staff)
-    const createdReservation = addReservation(reservation, null);
-    if (!createdReservation) {
-        showAppAlert('Cette chambre vient d’être demandée pour ces dates. Veuillez réessayer avec une autre période.');
-        return;
-    }
-
-    closeModal();
-    renderRooms();
-
-    showAppAlert('Votre demande de réservation a été envoyée. Elle reste à confirmer par notre équipe.');
 }
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', function () {
-    renderRooms();
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    searchCheckIn = getLocalDateString(today);
+    searchCheckOut = getLocalDateString(tomorrow);
+    document.getElementById('searchCheckIn').value = searchCheckIn;
+    document.getElementById('searchCheckOut').value = searchCheckOut;
+    document.getElementById('searchCheckIn').min = searchCheckIn;
+    document.getElementById('searchCheckOut').min = searchCheckOut;
 
-    document.getElementById('checkIn').addEventListener('change', function () {
-        const checkIn = new Date(this.value);
-        const nextDay = new Date(checkIn);
-        nextDay.setDate(nextDay.getDate() + 1);
-        document.getElementById('checkOut').min = getLocalDateString(nextDay);
-        calculateTotal();
+    document.getElementById('roomSearchForm').addEventListener('submit', event => {
+        event.preventDefault();
+        searchCheckIn = document.getElementById('searchCheckIn').value;
+        searchCheckOut = document.getElementById('searchCheckOut').value;
+        selectedGuestCount = Number(document.getElementById('searchGuests').value);
+        if (!searchCheckIn || !searchCheckOut || searchCheckOut <= searchCheckIn) {
+            document.getElementById('roomSearchStatus').textContent = 'La date de départ doit être après la date d’arrivée.';
+            return;
+        }
+        filterStatus('all');
+        renderRooms();
     });
-
-    document.getElementById('checkOut').addEventListener('change', calculateTotal);
+    renderRooms();
 });

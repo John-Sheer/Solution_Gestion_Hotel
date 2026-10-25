@@ -16,8 +16,11 @@
     <link rel="stylesheet" href="css/styles-modules.css">
 
     <script src="js/dialogs.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
     <script src="js/api-config.js"></script>
     <script src="js/storage.js"></script>
+    <script src="js/shared-operations.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/chambres.js"></script>
     <script src="js/animations.js"></script>
@@ -34,7 +37,7 @@
                             d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
                     </svg>
                 </div>
-                <h1>Hôtel</h1>
+                <span>Hôtel</span>
             </a>
             <button class="menu-toggle" onclick="toggleMenu()" aria-controls="navMenu" aria-expanded="false" aria-label="Ouvrir le menu de navigation">
                 <span></span><span></span><span></span>
@@ -42,6 +45,7 @@
             <ul class="navbar-menu" id="navMenu">
                 <li><a href="index.html">Accueil</a></li>
                 <li><a href="chambres.html" class="active">Chambres</a></li>
+                <li><a href="boissons.html">Bar / Boissons</a></li>
                 <li><a href="index.html#services">Services</a></li>
             </ul>
         </div>
@@ -50,27 +54,50 @@
     <header class="page-header rooms-header">
         <div class="container">
             <h1>Choisissez votre chambre</h1>
-            <p><span id="availableRooms">0</span> chambres disponibles aujourd'hui · Demande de réservation en ligne</p>
+            <p><span id="availableRooms">--</span> chambres disponibles pour vos dates · Demande à confirmer par la réception</p>
         </div>
     </header>
 
     <main class="main-content">
         <div class="container">
+            <form class="room-search" id="roomSearchForm">
+                <label class="form-group">
+                    <span class="form-label">Arrivée</span>
+                    <input class="form-input" id="searchCheckIn" type="date" required>
+                </label>
+                <label class="form-group">
+                    <span class="form-label">Départ</span>
+                    <input class="form-input" id="searchCheckOut" type="date" required>
+                </label>
+                <label class="form-group">
+                    <span class="form-label">Personnes</span>
+                    <select class="form-select" id="searchGuests">
+                        <option value="1">1 personne</option>
+                        <option value="2" selected>2 personnes</option>
+                        <option value="3">3 personnes</option>
+                        <option value="4">4 personnes</option>
+                        <option value="5">5 personnes</option>
+                        <option value="6">6 personnes</option>
+                    </select>
+                </label>
+                <button class="btn btn-primary" type="submit">Rechercher</button>
+            </form>
+            <p class="room-search-status" id="roomSearchStatus" role="status" aria-live="polite"></p>
             <div class="filter-bar">
                 <div class="filter-group">
                     <label>Type :</label>
                     <div class="filter-tabs">
-                        <button class="filter-tab active" onclick="filterRooms('all')">Toutes</button>
-                        <button class="filter-tab" onclick="filterRooms('ventilated')">Ventilées</button>
-                        <button class="filter-tab" onclick="filterRooms('air_conditioned')">Climatisées</button>
-                        <button class="filter-tab" onclick="filterRooms('apartment')">Appartements</button>
+                        <button class="filter-tab active" type="button" aria-pressed="true" onclick="filterRooms('all')">Toutes</button>
+                        <button class="filter-tab" type="button" aria-pressed="false" onclick="filterRooms('ventilated')">Ventilées</button>
+                        <button class="filter-tab" type="button" aria-pressed="false" onclick="filterRooms('air_conditioned')">Climatisées</button>
+                        <button class="filter-tab" type="button" aria-pressed="false" onclick="filterRooms('apartment')">Appartements</button>
                     </div>
                 </div>
                 <div class="filter-group">
                     <label>Disponibilité :</label>
                     <div class="filter-tabs">
-                        <button class="filter-tab active" onclick="filterStatus('all')">Toutes</button>
-                        <button class="filter-tab" onclick="filterStatus('available')">Disponibles</button>
+                        <button class="filter-tab active" type="button" aria-pressed="true" onclick="filterStatus('all')">Toutes</button>
+                        <button class="filter-tab" type="button" aria-pressed="false" onclick="filterStatus('available')">Disponibles</button>
                     </div>
                 </div>
             </div>
@@ -81,11 +108,11 @@
         </div>
     </main>
 
-    <div class="modal-overlay" id="reservationModal">
-        <div class="modal">
+    <div class="modal-overlay" id="reservationModal" role="presentation">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reservationModalTitle">
             <div class="modal-header">
-                <h3>Demande de réservation</h3>
-                <button class="cart-close" onclick="closeModal()">
+                <h3 id="reservationModalTitle">Demande de réservation</h3>
+                <button class="cart-close" type="button" aria-label="Fermer la fenêtre" onclick="closeModal()">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -108,16 +135,16 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="guestPhone">Téléphone *</label>
-                        <input type="tel" class="form-input" id="guestPhone" required autocomplete="tel">
+                        <input type="tel" class="form-input" id="guestPhone" required autocomplete="tel" maxlength="40">
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="checkIn">Arrivée *</label>
-                            <input type="date" class="form-input" id="checkIn" required>
+                            <input type="date" class="form-input" id="checkIn" required readonly>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="checkOut">Départ *</label>
-                            <input type="date" class="form-input" id="checkOut" required>
+                            <input type="date" class="form-input" id="checkOut" required readonly>
                         </div>
                     </div>
                     <div class="form-group">
@@ -158,6 +185,7 @@
                     <ul>
                         <li><a href="index.html">Accueil</a></li>
                         <li><a href="chambres.html">Chambres</a></li>
+                        <li><a href="boissons.html">Bar / Boissons</a></li>
                         <li><a href="index.html#services">Services</a></li>
                         <li><a href="login.html">Espace Pro</a></li>
                     </ul>
