@@ -9,6 +9,7 @@ const STORAGE_KEYS = {
     ORDERS: 'hotel_orders',
     CART: 'hotel_cart'
 };
+const ACTIONS_LOG_KEY = 'hotel_actions';
 
 // Images placeholder pour les chambres
 const ROOM_IMAGES = {
@@ -75,6 +76,45 @@ function getData(key) {
 
 function setData(key, data) {
     localStorage.setItem(key, JSON.stringify(data));
+}
+
+function logAction(type, description, details = {}, actor = null) {
+    const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    const user = actor || currentUser;
+    const logs = JSON.parse(localStorage.getItem(ACTIONS_LOG_KEY) || '[]');
+    const logEntry = {
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        type,
+        description,
+        details,
+        user: user ? {
+            id: user.userId || user.id,
+            name: user.name,
+            role: user.role
+        } : { name: 'Système', role: 'system' }
+    };
+
+    logs.unshift(logEntry);
+    if (logs.length > 500) logs.splice(500);
+    localStorage.setItem(ACTIONS_LOG_KEY, JSON.stringify(logs));
+    return logEntry;
+}
+
+function getActionLogs(limit = 50) {
+    return JSON.parse(localStorage.getItem(ACTIONS_LOG_KEY) || '[]').slice(0, limit);
+}
+
+function getActionLogsByUser(userId, limit = 50) {
+    return JSON.parse(localStorage.getItem(ACTIONS_LOG_KEY) || '[]')
+        .filter(log => log.user && log.user.id === userId)
+        .slice(0, limit);
+}
+
+function getActionLogsByType(type, limit = 50) {
+    return JSON.parse(localStorage.getItem(ACTIONS_LOG_KEY) || '[]')
+        .filter(log => log.type === type)
+        .slice(0, limit);
 }
 
 function initializeData() {
@@ -148,6 +188,18 @@ function addReservation(reservation, user = null) {
     };
     reservations.push(newRes);
     setData(STORAGE_KEYS.RESERVATIONS, reservations);
+    logAction('RESERVATION_CREATE', `Demande de réservation pour ${newRes.guestName}`, {
+        guestName: newRes.guestName,
+        guestPhone: newRes.guestPhone,
+        roomNumber: room.number,
+        roomType: getTypeLabel(room.type),
+        checkIn: newRes.checkIn,
+        checkOut: newRes.checkOut,
+        guests: newRes.guests,
+        totalPrice: newRes.totalPrice,
+        reservationId: newRes.id,
+        toStatus: newRes.status
+    }, newRes.createdBy);
     return newRes;
 }
 
@@ -201,6 +253,47 @@ function checkInReservation(id) {
     return reservation;
 }
 
+function checkInWalkInReservation(details, user) {
+    if (!user || user.role !== 'hotel_manager') return null;
+
+    const roomId = Number(details.roomId);
+    const room = getRoomById(roomId);
+    const guestName = typeof details.guestName === 'string' ? details.guestName.trim() : '';
+    const guestPhone = typeof details.guestPhone === 'string' ? details.guestPhone.trim() : '';
+    const checkIn = getLocalDateString(new Date());
+    const checkOut = details.checkOut;
+    const guests = Number(details.guests);
+
+    if (!room || room.status !== 'available' || !guestName || !guestPhone
+        || !Number.isInteger(guests) || guests < 1 || guests > room.capacity
+        || !isRoomAvailableForDates(roomId, checkIn, checkOut)) {
+        return null;
+    }
+
+    const nights = Math.round(
+        (Date.parse(`${checkOut}T00:00:00`) - Date.parse(`${checkIn}T00:00:00`)) / 86400000
+    );
+    const reservations = getReservations();
+    const reservation = {
+        id: reservations.length > 0 ? Math.max(...reservations.map(item => item.id)) + 1 : 1,
+        roomId,
+        guestName,
+        guestPhone,
+        checkIn,
+        checkOut,
+        guests,
+        totalPrice: nights * room.price,
+        status: 'checked_in',
+        createdAt: new Date().toISOString(),
+        createdBy: { name: user.name, role: user.role }
+    };
+
+    reservations.push(reservation);
+    setData(STORAGE_KEYS.RESERVATIONS, reservations);
+    updateRoom(roomId, { status: 'occupied' });
+    return reservation;
+}
+
 function cancelReservation(id) {
     const reservations = getReservations();
     const res = reservations.find(r => r.id === id && ['requested', 'active', 'checked_in'].includes(r.status));
@@ -221,6 +314,7 @@ function completeReservation(id) {
     const res = reservations.find(r => r.id === id && r.status === 'checked_in');
     if (res) {
         res.status = 'completed';
+        res.completedAt = new Date().toISOString();
         setData(STORAGE_KEYS.RESERVATIONS, reservations);
         const room = getRoomById(res.roomId);
         if (room && room.status === 'occupied') updateRoom(res.roomId, { status: 'available' });
@@ -335,6 +429,14 @@ function createOrder(roomNumber, user = null) {
         if (b) updateBeverage(i.beverageId, { stock: Math.max(0, b.stock - i.quantity) });
     });
     clearCart();
+    logAction('ORDER_CREATE', `Commande #${newOrder.id} envoyée`, {
+        orderId: newOrder.id,
+        roomNumber: newOrder.roomNumber,
+        itemCount: newOrder.items.reduce((total, item) => total + item.quantity, 0),
+        itemsSummary: newOrder.items.map(item => `${item.quantity} × ${item.name}`).join(', '),
+        totalPrice: newOrder.totalPrice,
+        toStatus: newOrder.status
+    }, newOrder.createdBy);
     return newOrder;
 }
 
@@ -359,26 +461,50 @@ function getStats() {
     const reservations = getReservations();
     const orders = getOrders();
     const beverages = getBeverages();
+    const now = new Date();
+    const today = getLocalDateString(now);
+    const month = today.slice(0, 7);
     const occupied = rooms.filter(r => r.status === 'occupied').length;
+    const completedReservations = reservations.filter(r => r.status === 'completed');
+    const completedOrders = orders.filter(o => o.status === 'completed');
+    const reservationRevenueToday = completedReservations
+        .filter(r => r.completedAt && getLocalDateString(new Date(r.completedAt)) === today)
+        .reduce((total, r) => total + r.totalPrice, 0);
+    const orderRevenueToday = completedOrders
+        .filter(o => o.processedAt && getLocalDateString(new Date(o.processedAt)) === today)
+        .reduce((total, o) => total + o.totalPrice, 0);
+    const reservationRevenueMonth = completedReservations
+        .filter(r => r.completedAt && getLocalDateString(new Date(r.completedAt)).slice(0, 7) === month)
+        .reduce((total, r) => total + r.totalPrice, 0);
+    const orderRevenueMonth = completedOrders
+        .filter(o => o.processedAt && getLocalDateString(new Date(o.processedAt)).slice(0, 7) === month)
+        .reduce((total, o) => total + o.totalPrice, 0);
 
     return {
         rooms: {
             total: rooms.length,
             occupied,
-            available: getAvailableRoomsForDates(getLocalDateString(new Date()), getLocalDateString(new Date(Date.now() + 86400000))).length,
+            available: getAvailableRoomsForDates(today, getLocalDateString(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1))).length,
             maintenance: rooms.filter(r => r.status === 'maintenance').length,
             occupancyRate: rooms.length > 0 ? Math.round((occupied / rooms.length) * 100) : 0
         },
         reservations: {
             total: reservations.length,
+            pending: reservations.filter(r => r.status === 'requested').length,
             active: reservations.filter(r => ['active', 'checked_in'].includes(r.status)).length,
-            revenue: reservations.filter(r => r.status === 'active' || r.status === 'completed').reduce((s, r) => s + r.totalPrice, 0)
+            checkedIn: reservations.filter(r => r.status === 'checked_in').length,
+            inProgressValue: reservations.filter(r => ['active', 'checked_in'].includes(r.status)).reduce((total, r) => total + r.totalPrice, 0),
+            revenue: completedReservations.reduce((total, r) => total + r.totalPrice, 0),
+            revenueToday: reservationRevenueToday,
+            revenueMonth: reservationRevenueMonth
         },
         orders: {
             total: orders.length,
             pending: orders.filter(o => o.status === 'pending').length,
-            today: orders.filter(o => new Date(o.createdAt).toDateString() === new Date().toDateString()).length,
-            revenue: orders.filter(o => o.status === 'completed').reduce((s, o) => s + o.totalPrice, 0)
+            today: orders.filter(o => o.createdAt && getLocalDateString(new Date(o.createdAt)) === today).length,
+            revenue: completedOrders.reduce((total, o) => total + o.totalPrice, 0),
+            revenueToday: orderRevenueToday,
+            revenueMonth: orderRevenueMonth
         },
         beverages: {
             total: beverages.length,

@@ -3,73 +3,58 @@
 // ===========================================
 
 const AUTH_KEY = 'hotel_auth';
-const USERS_KEY = 'hotel_users';
-const ACTIONS_LOG_KEY = 'hotel_actions';
 const DASHBOARD_EXIT_WARNING = 'Vous allez quitter le tableau de bord. Vos identifiants seront demandés à nouveau avant d’y accéder.';
 
-// Supprimer les anciennes sessions persistantes créées avant le passage à sessionStorage.
-localStorage.removeItem(AUTH_KEY);
-
-// Utilisateurs par défaut
-// Rôles : owner (propriétaire, lecture seule), hotel_manager (gérant hôtel), bar_manager (gérant bar)
-const defaultUsers = [
-    {
-        id: 1,
-        username: 'proprietaire',
-        password: 'admin2026',
-        role: 'owner',
-        name: 'Administrateur',
-        createdAt: new Date().toISOString()
-    },
-    {
-        id: 2,
-        username: 'gerant_hotel',
-        password: 'hotel2026',
-        role: 'hotel_manager',
-        name: 'Kouassi Ameyo',
-        createdAt: new Date().toISOString()
-    },
-    {
-        id: 3,
-        username: 'gerant_bar',
-        password: 'bar2026',
-        role: 'bar_manager',
-        name: 'Mensah Kodjo',
-        createdAt: new Date().toISOString()
+function getSupabaseClient() {
+    if (!window.hotelSupabaseClient) {
+        throw new Error(window.hotelSupabaseConfigurationError || 'Supabase n’est pas configuré.');
     }
-];
-
-// Initialiser les utilisateurs
-function initUsers() {
-    // Forcer la réinitialisation pour les nouveaux rôles
-    localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers));
+    return window.hotelSupabaseClient;
 }
 
-// Obtenir tous les utilisateurs
-function getUsers() {
-    initUsers();
-    return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+async function getAuthenticatedProfile() {
+    const client = getSupabaseClient();
+    const { data: { user }, error: authError } = await client.auth.getUser();
+    if (authError?.name === 'AuthSessionMissingError') return null;
+    if (authError) throw authError;
+    if (!user) return null;
+
+    const { data: profile, error } = await client
+        .from('staff_profiles')
+        .select('id, full_name, role, active')
+        .eq('id', user.id)
+        .maybeSingle();
+    if (error) throw error;
+    if (!profile || !profile.active) return null;
+
+    return {
+        userId: profile.id,
+        id: profile.id,
+        username: user.email,
+        email: user.email,
+        name: profile.full_name,
+        role: profile.role
+    };
 }
 
-// Authentification
-function login(username, password) {
-    const users = getUsers();
-    const user = users.find(u => u.username === username && u.password === password);
+async function login(email, password) {
+    const client = getSupabaseClient();
+    const { error: signInError } = await client.auth.signInWithPassword({ email, password });
+    if (signInError) return { success: false, message: 'Adresse e-mail ou mot de passe incorrect.' };
 
-    if (user) {
-        const session = {
-            userId: user.id,
-            username: user.username,
-            name: user.name,
-            role: user.role,
-            loginTime: new Date().toISOString()
-        };
-        sessionStorage.setItem(AUTH_KEY, JSON.stringify(session));
-        logAction('LOGIN', `Connexion réussie`);
-        return { success: true, user: session };
+    try {
+        const user = await getAuthenticatedProfile();
+        if (!user) {
+            await client.auth.signOut();
+            return { success: false, message: 'Ce compte n’est pas activé pour accéder au tableau de bord.' };
+        }
+        sessionStorage.setItem(AUTH_KEY, JSON.stringify(user));
+        logAction('LOGIN', 'Connexion réussie', { role: getRoleLabel(user.role) }, user);
+        return { success: true, user };
+    } catch (error) {
+        await client.auth.signOut();
+        throw error;
     }
-
-    return { success: false, message: 'Identifiants incorrects' };
 }
 
 // Déconnexion
@@ -81,16 +66,26 @@ async function logout() {
     });
     if (!confirmed) return false;
 
-    clearAuthSession();
+    try {
+        await clearAuthSession();
+    } catch (error) {
+        console.error('Échec de déconnexion Supabase :', error);
+        await showAppAlert('La déconnexion sécurisée a échoué. Vérifiez votre connexion et réessayez.');
+        return false;
+    }
     window.dashboardExitConfirmed = true;
     window.location.replace('login.html');
     return true;
 }
 
-function clearAuthSession() {
+async function clearAuthSession() {
     const session = getCurrentUser();
     if (session) {
-        logAction('LOGOUT', `Déconnexion`);
+        logAction('LOGOUT', 'Déconnexion', { role: getRoleLabel(session.role) });
+    }
+    if (window.hotelSupabaseClient) {
+        const { error } = await window.hotelSupabaseClient.auth.signOut();
+        if (error) throw error;
     }
     sessionStorage.removeItem(AUTH_KEY);
     localStorage.removeItem(AUTH_KEY);
@@ -114,7 +109,13 @@ function protectDashboardExit() {
         });
         if (!confirmed) return;
 
-        clearAuthSession();
+        try {
+            await clearAuthSession();
+        } catch (error) {
+            console.error('Échec de déconnexion Supabase :', error);
+            await showAppAlert('La déconnexion sécurisée a échoué. Vérifiez votre connexion et réessayez.');
+            return;
+        }
         window.dashboardExitConfirmed = true;
         window.location.assign(destination.href);
     });
@@ -125,10 +126,14 @@ function protectDashboardExit() {
         event.returnValue = '';
     });
 
-    window.addEventListener('pagehide', clearAuthSession);
     window.addEventListener('pageshow', (event) => {
-        if (event.persisted && !isAuthenticated()) {
-            window.location.replace('login.html');
+        if (event.persisted) {
+            getAuthenticatedProfile().then(profile => {
+                if (!profile) window.location.replace('login.html');
+            }).catch(error => {
+                console.error('Échec de vérification de session :', error);
+                window.location.replace('login.html');
+            });
         }
     });
 }
@@ -141,7 +146,7 @@ function getCurrentUser() {
 
 // Vérifier si connecté
 function isAuthenticated() {
-    return getCurrentUser() !== null;
+    return getAuthenticatedProfile();
 }
 
 // Vérifier le rôle
@@ -181,72 +186,44 @@ function canPerformAction(action) {
 }
 
 // Protéger une page (rediriger si non connecté)
-function requireAuth(allowedRoles = ['owner', 'staff']) {
-    const user = getCurrentUser();
+async function requireAuth(allowedRoles = ['owner', 'hotel_manager', 'bar_manager']) {
+    let user;
+    try {
+        user = await getAuthenticatedProfile();
+    } catch (error) {
+        console.error('Échec de vérification du compte Supabase :', error);
+        await showAppAlert(error.message || 'Impossible de vérifier le compte.');
+        window.location.replace('login.html');
+        return false;
+    }
 
     if (!user) {
+        sessionStorage.removeItem(AUTH_KEY);
         window.location.href = 'login.html';
         return false;
     }
 
+    sessionStorage.setItem(AUTH_KEY, JSON.stringify(user));
     if (!allowedRoles.includes(user.role)) {
-        showAppAlert('Accès non autorisé').then(() => {
-            clearAuthSession();
+        showAppAlert('Accès non autorisé').then(async () => {
+            try {
+                await clearAuthSession();
+            } catch (error) {
+                console.error('Échec de déconnexion :', error);
+            }
             window.dashboardExitConfirmed = true;
             window.location.replace('login.html');
         });
         return false;
     }
 
+    window.hotelCurrentUser = user;
     return true;
 }
 
 // ===========================================
 // Système de Log des Actions
 // ===========================================
-
-function logAction(type, description, details = {}) {
-    const user = getCurrentUser();
-    const logs = JSON.parse(localStorage.getItem(ACTIONS_LOG_KEY) || '[]');
-
-    const logEntry = {
-        id: Date.now(),
-        timestamp: new Date().toISOString(),
-        type: type,
-        description: description,
-        details: details,
-        user: user ? {
-            id: user.userId,
-            name: user.name,
-            role: user.role
-        } : { name: 'Système', role: 'system' }
-    };
-
-    logs.unshift(logEntry); // Ajouter au début
-
-    // Garder seulement les 500 derniers logs
-    if (logs.length > 500) {
-        logs.splice(500);
-    }
-
-    localStorage.setItem(ACTIONS_LOG_KEY, JSON.stringify(logs));
-    return logEntry;
-}
-
-function getActionLogs(limit = 50) {
-    const logs = JSON.parse(localStorage.getItem(ACTIONS_LOG_KEY) || '[]');
-    return logs.slice(0, limit);
-}
-
-function getActionLogsByUser(userId, limit = 50) {
-    const logs = JSON.parse(localStorage.getItem(ACTIONS_LOG_KEY) || '[]');
-    return logs.filter(log => log.user && log.user.id === userId).slice(0, limit);
-}
-
-function getActionLogsByType(type, limit = 50) {
-    const logs = JSON.parse(localStorage.getItem(ACTIONS_LOG_KEY) || '[]');
-    return logs.filter(log => log.type === type).slice(0, limit);
-}
 
 // Labels pour les types d'actions
 function getActionTypeLabel(type) {
@@ -256,6 +233,7 @@ function getActionTypeLabel(type) {
         'RESERVATION_CREATE': 'Réservation créée',
         'RESERVATION_CONFIRM': 'Réservation confirmée',
         'CHECKIN': 'Arrivée enregistrée',
+        'CHECKIN_WALK_IN': 'Arrivée sans réservation',
         'RESERVATION_CANCEL': 'Réservation annulée',
         'CHECKOUT': 'Check-out',
         'ORDER_CREATE': 'Commande créée',
@@ -273,10 +251,11 @@ function getRoleLabel(role) {
         'owner': 'Propriétaire',
         'hotel_manager': 'Gérant Hôtel',
         'bar_manager': 'Gérant Bar',
+        'guest': 'Client',
+        'client': 'Client',
         'system': 'Système'
     };
     return labels[role] || role;
 }
 
 // Initialisation
-initUsers();

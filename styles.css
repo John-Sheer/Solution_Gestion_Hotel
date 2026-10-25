@@ -3394,26 +3394,19 @@ body {
 }
 
 .hero-availability-badge {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    z-index: 20;
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
-    gap: 7px;
-    padding: 8px 11px;
-    border: 1px solid rgba(16, 42, 70, 0.12);
-    border-radius: 8px;
-    background: #fff;
-    box-shadow: 0 5px 18px rgba(10, 25, 47, 0.14);
+    gap: 8px;
+    padding: 5px 12px;
+    border-left: 1px solid rgba(166, 132, 73, 0.6);
     color: var(--brand-navy);
     text-decoration: none;
-    transition: transform 180ms ease, box-shadow 180ms ease;
+    transition: border-color 180ms ease, color 180ms ease;
 }
 
 .hero-availability-badge:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(10, 25, 47, 0.18);
+    border-color: var(--brand-gold-deep);
 }
 
 .hero-availability-badge:focus-visible {
@@ -3422,26 +3415,28 @@ body {
 }
 
 .hero-availability-dot {
-    width: 7px;
-    height: 7px;
-    flex: 0 0 7px;
+    width: 6px;
+    height: 6px;
+    flex: 0 0 6px;
     border-radius: 50%;
-    background: var(--color-success);
+    background: var(--brand-gold-deep);
 }
 
 .hero-availability-count {
     color: var(--brand-navy);
-    font-size: 0.82rem;
-    font-weight: 700;
+    font-family: var(--font-serif);
+    font-size: 1.45rem;
+    font-weight: 500;
     line-height: 1;
 }
 
 .hero-availability-copy {
     color: var(--text-secondary);
-    font-size: 0.66rem;
+    max-width: 78px;
+    font-size: 0.64rem;
     font-weight: 500;
-    letter-spacing: 0.01em;
-    line-height: 1.2;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
 }
 
 /* ---------- Statistiques ---------- */
@@ -4194,15 +4189,12 @@ tbody tr:hover {
         padding-bottom: 68px;
     }
 
-    .hero-availability-badge {
-        top: 10px;
-        right: 10px;
-        gap: 6px;
-        padding: 7px 9px;
+    .navbar-menu {
+        z-index: 1002;
     }
 
     .hero-availability-copy {
-        font-size: 0.6rem;
+        font-size: 0.58rem;
     }
 
     .hero-availability {
@@ -4546,6 +4538,13 @@ table {
         width: min(92%, var(--container-width));
     }
 
+    .hero-availability-badge {
+        margin-left: auto;
+        margin-right: 14px;
+        padding: 5px 10px;
+        gap: 7px;
+    }
+
     .navbar-menu {
         top: var(--header-height);
         max-height: calc(100dvh - var(--header-height));
@@ -4616,9 +4615,24 @@ table {
     }
 
     .navbar-brand--full h1 {
-        max-width: 185px;
+        max-width: 145px;
         font-size: 0.67rem;
         letter-spacing: 0.04em;
+    }
+
+    .hero-availability-badge {
+        margin-right: 10px;
+        padding: 5px 8px;
+        gap: 6px;
+    }
+
+    .hero-availability-copy {
+        max-width: 58px;
+        font-size: 0.58rem;
+    }
+
+    .hero-availability-count {
+        font-size: 1.2rem;
     }
 
     .logo-icon {
@@ -4687,6 +4701,49 @@ table {
     .cart-toggle {
         right: 16px;
         bottom: max(16px, env(safe-area-inset-bottom));
+    }
+}
+
+@media (max-width: 420px) {
+    .navbar-brand--full h1 {
+        max-width: 110px;
+    }
+
+    .navbar-brand .logo-icon {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+@media (max-width: 380px) {
+    .navbar-brand--full {
+        gap: 6px;
+    }
+
+    .navbar-brand--full h1 {
+        max-width: 92px;
+        font-size: 0.58rem;
+    }
+
+    .navbar-brand .logo-icon {
+        width: 34px;
+        height: 34px;
+    }
+
+    .hero-availability-badge {
+        margin-right: 7px;
+        padding: 5px 7px;
+        gap: 5px;
+    }
+
+    .hero-availability-copy {
+        max-width: 48px;
+        font-size: 0.54rem;
+    }
+
+    .menu-toggle {
+        width: 38px;
+        flex: 0 0 38px;
     }
 }
 
@@ -4877,4 +4934,824 @@ table {
         padding: 8px 10px;
         font-size: 0.58rem;
     }
+}
+
+.reservation-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.reservation-header-actions .btn {
+    white-space: nowrap;
+}
+
+.reservation-header-actions .reservation-action--new,
+.reservation-actions .reservation-action {
+    min-height: 38px;
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    text-transform: none;
+    box-shadow: none;
+    transform: none;
+}
+
+.reservation-header-actions .reservation-action--new {
+    min-height: 40px;
+    padding: 9px 14px;
+    background: var(--brand-navy);
+    border-color: var(--brand-navy);
+    color: #fff;
+}
+
+.reservation-header-actions .reservation-action--new:hover {
+    background: var(--brand-navy-light);
+    border-color: var(--brand-navy-light);
+    color: #fff;
+    box-shadow: 0 5px 14px rgba(10, 25, 47, 0.14);
+    transform: translateY(-1px);
+}
+
+.reservation-header-actions .reservation-action--new svg,
+.reservation-actions .reservation-action svg {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 15px;
+}
+
+.reservation-actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+}
+
+.reservation-actions .reservation-action--confirm,
+.reservation-actions .reservation-action--checkin {
+    background: var(--brand-navy);
+    border-color: var(--brand-navy);
+    color: #fff;
+}
+
+.reservation-actions .reservation-action--confirm:hover,
+.reservation-actions .reservation-action--checkin:hover {
+    background: var(--brand-navy-light);
+    border-color: var(--brand-navy-light);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(10, 25, 47, 0.14);
+    transform: translateY(-1px);
+}
+
+.reservation-actions .reservation-action--checkout {
+    background: rgba(197, 160, 89, 0.1);
+    border-color: rgba(166, 132, 73, 0.35);
+    color: #755a2e;
+}
+
+.reservation-actions .reservation-action--checkout:hover {
+    background: rgba(197, 160, 89, 0.18);
+    border-color: rgba(166, 132, 73, 0.6);
+    color: #634a22;
+    transform: translateY(-1px);
+}
+
+.reservation-actions .reservation-action--cancel {
+    width: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    padding: 8px;
+    background: #fff;
+    border-color: rgba(166, 59, 50, 0.2);
+    color: #a63b32;
+}
+
+.reservation-actions .reservation-action--cancel:hover {
+    background: rgba(166, 59, 50, 0.08);
+    border-color: rgba(166, 59, 50, 0.42);
+    color: #8f2e27;
+}
+
+.reservation-actions .reservation-action:focus-visible,
+.reservation-header-actions .reservation-action--new:focus-visible {
+    outline: 3px solid rgba(197, 160, 89, 0.45);
+    outline-offset: 2px;
+}
+
+.table-header #activityCount {
+    flex: 0 0 auto;
+}
+
+#activityTable td:nth-child(3) {
+    min-width: 280px;
+    max-width: 560px;
+}
+
+.activity-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 16px;
+    margin: 7px 0 0;
+}
+
+.activity-detail {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    max-width: 100%;
+    font-size: 0.74rem;
+    line-height: 1.4;
+}
+
+.activity-detail dt {
+    flex: 0 0 auto;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.activity-detail dt::after {
+    content: ":";
+}
+
+.activity-detail dd {
+    min-width: 0;
+    margin: 0;
+    color: var(--brand-navy);
+    overflow-wrap: anywhere;
+}
+
+.walk-in-intro {
+    margin: 0 0 20px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+
+#walkInModal .modal-body {
+    max-height: min(65vh, 620px);
+    overflow-y: auto;
+}
+
+#walkInSubmit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+    .reservation-header-actions {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .reservation-header-actions .btn {
+        padding: 8px 10px;
+        font-size: 0.68rem;
+    }
+}
+
+/* ---------- Dashboard role-specific overview ---------- */
+.dashboard-overview {
+    margin: 0 0 28px;
+}
+
+.dashboard-overview__heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 18px;
+}
+
+.dashboard-overview__heading .eyebrow {
+    color: var(--brand-gold-dark, #9a7947);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.dashboard-overview__heading h2 {
+    margin: 5px 0 0;
+    color: var(--brand-navy);
+    font-family: var(--font-serif);
+    font-size: clamp(1.45rem, 2.5vw, 1.9rem);
+}
+
+.dashboard-overview__heading > p {
+    max-width: 480px;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.86rem;
+    line-height: 1.5;
+    text-align: right;
+}
+
+.stats-grid--owner,
+.stats-grid--hotel-manager,
+.stats-grid--bar-manager {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 142px), 154px));
+    justify-content: start;
+    gap: 10px;
+}
+
+.dashboard-overview .stat-card {
+    position: relative;
+    min-width: 0;
+    width: 100%;
+    aspect-ratio: 1;
+    min-height: 0;
+    padding: 12px;
+    overflow: hidden;
+    border: 0;
+    border-radius: 4px;
+    background: #102a46;
+    box-shadow: none;
+    transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.dashboard-overview .stat-card:hover {
+    transform: translateY(-3px);
+    background: #173956;
+}
+
+.dashboard-overview .stat-content {
+    min-width: 0;
+    width: 100%;
+    padding: 0;
+}
+
+.dashboard-overview .stat-content .stat-label {
+    min-height: 0;
+    margin: 0 27px 6px 0;
+    color: rgba(255, 255, 255, 0.76);
+    font-size: 0.64rem;
+    font-weight: 600;
+    letter-spacing: 0.075em;
+    line-height: 1.25;
+    text-transform: uppercase;
+}
+
+.dashboard-overview .stat-content h3 {
+    margin: 0;
+    color: #fff;
+    font-family: var(--font-serif);
+    font-size: clamp(1.4rem, 2vw, 1.7rem);
+    font-weight: 500;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.dashboard-overview .stat-content .stat-detail {
+    margin: 6px 0 0;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.69);
+    font-size: 0.62rem;
+    line-height: 1.3;
+}
+
+.stat-card__icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: grid;
+    width: 23px;
+    height: 23px;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    background: transparent;
+    color: #d7bd8a;
+}
+
+.stat-card__icon svg {
+    width: 13px;
+    height: 13px;
+}
+
+.dashboard-overview .stat-card--rooms { background: #294d67; }
+.dashboard-overview .stat-card--rooms:hover { background: #355d79; }
+.dashboard-overview .stat-card--available { background: #35634c; }
+.dashboard-overview .stat-card--available:hover { background: #43775c; }
+.dashboard-overview .stat-card--occupied { background: #994b43; }
+.dashboard-overview .stat-card--occupied:hover { background: #ad5a50; }
+.dashboard-overview .stat-card--maintenance,
+.dashboard-overview .stat-card--lowStock { background: #7f3939; }
+.dashboard-overview .stat-card--maintenance:hover,
+.dashboard-overview .stat-card--lowStock:hover { background: #944747; }
+.dashboard-overview .stat-card--roomRevenue { background: #76533c; }
+.dashboard-overview .stat-card--roomRevenue:hover { background: #896448; }
+.dashboard-overview .stat-card--barRevenue { background: #655078; }
+.dashboard-overview .stat-card--barRevenue:hover { background: #765f8b; }
+.dashboard-overview .stat-card--totalRevenue { background: #564631; }
+.dashboard-overview .stat-card--totalRevenue:hover { background: #6b583d; }
+.dashboard-overview .stat-card--monthRevenue { background: #8a6a2e; }
+.dashboard-overview .stat-card--monthRevenue:hover { background: #a17c37; }
+.dashboard-overview .stat-card--pending { background: #a24c3c; }
+.dashboard-overview .stat-card--pending:hover { background: #b65c4a; }
+.dashboard-overview .stat-card--stays { background: #37646b; }
+.dashboard-overview .stat-card--stays:hover { background: #45777e; }
+.dashboard-overview .stat-card--orders { background: #435b83; }
+.dashboard-overview .stat-card--orders:hover { background: #536c96; }
+.dashboard-overview .stat-card--todayOrders { background: #8c583c; }
+.dashboard-overview .stat-card--todayOrders:hover { background: #a36949; }
+.dashboard-overview .stat-card--todayRevenue { background: #55703a; }
+.dashboard-overview .stat-card--todayRevenue:hover { background: #668548; }
+.dashboard-overview .stat-card--roomTodayRevenue { background: #655078; }
+.dashboard-overview .stat-card--roomTodayRevenue:hover { background: #765f8b; }
+.dashboard-overview .stat-card--room .stat-card__icon { color: #e8c98d; }
+
+.owner-room-snapshot {
+    margin-bottom: 28px;
+}
+
+.owner-room-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    padding: 18px;
+}
+
+.owner-room-card {
+    min-width: 0;
+    padding: 14px 15px;
+    border: 1px solid rgba(16, 42, 70, 0.09);
+    border-radius: 9px;
+    background: #fcfbf8;
+}
+
+.owner-room-card--occupied,
+.owner-room-card--reserved {
+    border-top: 2px solid #b18443;
+}
+
+.owner-room-card--maintenance {
+    border-top: 2px solid #a45a52;
+}
+
+.owner-room-card--available {
+    border-top: 2px solid #557b67;
+}
+
+.owner-room-card__top,
+.owner-room-card__bottom {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.owner-room-card__top strong {
+    color: var(--brand-navy);
+    font-size: 0.9rem;
+}
+
+.owner-room-status {
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(85, 123, 103, 0.1);
+    color: #42634f;
+    font-size: 0.65rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.owner-room-card--occupied .owner-room-status,
+.owner-room-card--reserved .owner-room-status {
+    background: rgba(177, 132, 67, 0.12);
+    color: #80612f;
+}
+
+.owner-room-card--maintenance .owner-room-status {
+    background: rgba(164, 90, 82, 0.1);
+    color: #8b4943;
+}
+
+.owner-room-card > p {
+    margin: 12px 0;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+}
+
+.owner-room-card__bottom {
+    padding-top: 9px;
+    border-top: 1px solid rgba(16, 42, 70, 0.07);
+}
+
+.owner-room-card__bottom > span:first-child {
+    color: var(--brand-navy);
+    font-size: 0.84rem;
+    font-weight: 650;
+}
+
+.owner-room-card__bottom small {
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+    font-weight: 400;
+}
+
+.owner-room-guest {
+    color: var(--text-secondary);
+    max-width: 55%;
+    font-size: 0.71rem;
+    font-weight: 500;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 1024px) {
+    .stats-grid--owner,
+    .owner-room-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-overview__heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .dashboard-overview__heading > p {
+        text-align: left;
+    }
+
+    .owner-room-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 420px) {
+    .owner-room-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* ---------- Comptabilité centralisée ---------- */
+.accounting-section {
+    display: grid;
+    gap: 18px;
+    margin: 0 0 30px;
+}
+
+.accounting-heading,
+.accounting-ledger-heading,
+.accounting-approval-card__heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.accounting-heading .eyebrow {
+    color: var(--brand-gold-dark, #9a7947);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.accounting-heading h2 {
+    margin: 5px 0 0;
+    color: var(--brand-navy);
+    font-family: var(--font-serif);
+    font-size: clamp(1.45rem, 2.5vw, 1.9rem);
+}
+
+.accounting-heading > p,
+.accounting-panel > p,
+.accounting-owner-tools > p,
+.accounting-ledger-heading p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.55;
+}
+
+.accounting-heading > p {
+    max-width: 430px;
+    text-align: right;
+}
+
+.accounting-workspace {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.accounting-panel,
+.accounting-owner-tools {
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid rgba(16, 42, 70, 0.1);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 6px 22px rgba(16, 42, 70, 0.045);
+}
+
+.accounting-panel h3,
+.accounting-owner-tools h3 {
+    margin: 0 0 6px;
+    color: var(--brand-navy);
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+}
+
+.accounting-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.accounting-form .form-group {
+    min-width: 0;
+    margin: 0;
+}
+
+.accounting-form .form-label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+    font-weight: 650;
+    line-height: 1.4;
+}
+
+.accounting-form .form-input,
+.accounting-form .form-select {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 9px 10px;
+    border: 1px solid rgba(16, 42, 70, 0.16);
+    border-radius: 7px;
+    background-color: #fff;
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 0.82rem;
+}
+
+.accounting-form textarea.form-input {
+    min-height: 68px;
+    resize: vertical;
+}
+
+.accounting-form input[type="file"] {
+    padding: 7px;
+    font-size: 0.72rem;
+}
+
+.accounting-form .form-input:focus,
+.accounting-form .form-select:focus {
+    border-color: var(--brand-blue);
+    outline: 2px solid rgba(16, 42, 70, 0.12);
+    outline-offset: 1px;
+}
+
+.accounting-form__wide {
+    grid-column: 1 / -1;
+}
+
+.accounting-form > button {
+    justify-self: start;
+    min-height: 42px;
+}
+
+.accounting-balance-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    padding: 12px;
+    border-left: 3px solid #557b67;
+    border-radius: 5px;
+    background: #f2f6f2;
+    color: var(--brand-navy);
+    font-size: 0.78rem;
+}
+
+.accounting-balance-preview strong {
+    width: 100%;
+}
+
+.accounting-opening-status {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: #8b4943;
+    font-size: 0.78rem;
+}
+
+.accounting-closures {
+    display: grid;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.accounting-closure-row,
+.accounting-approval-card {
+    display: grid;
+    gap: 7px;
+    padding: 13px;
+    border: 1px solid rgba(16, 42, 70, 0.1);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+}
+
+.accounting-closure-row strong,
+.accounting-approval-card__heading strong {
+    color: var(--brand-navy);
+}
+
+.accounting-approval-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.accounting-approval-card__heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.accounting-approval-card__heading span {
+    color: var(--text-secondary);
+}
+
+.accounting-approval-card dl {
+    display: grid;
+    gap: 7px;
+    margin: 6px 0;
+}
+
+.accounting-approval-card dl div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.accounting-approval-card dt {
+    color: var(--text-secondary);
+}
+
+.accounting-approval-card dd {
+    margin: 0;
+    color: var(--brand-navy);
+    font-weight: 600;
+    text-align: right;
+}
+
+.accounting-approval-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.accounting-ledger-panel {
+    padding: 0;
+    overflow: hidden;
+}
+
+.accounting-ledger-heading {
+    align-items: center;
+    padding: 18px 20px;
+}
+
+.accounting-ledger-heading h3 {
+    margin-bottom: 3px;
+}
+
+.accounting-ledger-heading .btn {
+    flex: 0 0 auto;
+}
+
+.accounting-ledger-panel .table-scroll {
+    overflow-x: auto;
+}
+
+.accounting-ledger-panel table {
+    min-width: 900px;
+    margin: 0;
+}
+
+.accounting-ledger-panel td,
+.accounting-ledger-panel th {
+    padding: 11px 13px;
+    font-size: 0.75rem;
+    vertical-align: top;
+}
+
+.accounting-ledger-panel td small {
+    color: var(--text-secondary);
+}
+
+.accounting-ledger-panel a {
+    color: var(--brand-blue);
+    font-weight: 600;
+}
+
+.accounting-amount--in {
+    color: #35634c;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.accounting-amount--out {
+    color: #994b43;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.accounting-reverse-button {
+    padding: 6px 8px;
+    border: 1px solid rgba(153, 75, 67, 0.25);
+    border-radius: 6px;
+    background: #fff;
+    color: #8b3933;
+    font: inherit;
+    font-size: 0.7rem;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.accounting-reverse-button:hover {
+    background: #fbefed;
+}
+
+.accounting-empty {
+    padding: 18px !important;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .accounting-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .accounting-heading > p {
+        text-align: left;
+    }
+
+    .accounting-workspace {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .accounting-panel,
+    .accounting-owner-tools {
+        padding: 14px;
+    }
+
+    .accounting-form {
+        grid-template-columns: 1fr;
+    }
+
+    .accounting-form__wide {
+        grid-column: auto;
+    }
+
+    .accounting-approval-card dl div {
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .accounting-approval-card dd {
+        text-align: left;
+    }
+}
+/* Superuser account administration */
+.user-administration-panel {
+    max-width: 760px;
+    margin: 0 auto 2rem;
+}
+
+.user-administration-panel h2 {
+    margin: 0.35rem 0 0.5rem;
+}
+
+.user-administration-panel > p {
+    color: var(--text-secondary);
+}
+
+.user-administration-status {
+    min-height: 1.5rem;
+    margin-bottom: 0;
+    color: var(--color-success, #287a50);
+}
+
+.user-administration-status--error {
+    color: var(--color-danger, #a53030);
 }

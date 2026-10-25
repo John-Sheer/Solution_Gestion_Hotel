@@ -73,6 +73,30 @@
 
     <main class="main-content">
         <div class="container">
+            <section class="accounting-panel user-administration-panel" id="userAdministrationSection" aria-labelledby="userAdministrationTitle" hidden>
+                <span class="eyebrow">Administration sécurisée</span>
+                <h2 id="userAdministrationTitle">Inviter un utilisateur</h2>
+                <p>Les nouveaux comptes reçoivent une invitation par e-mail. Le superuser peut créer des comptes gérants, sans accès aux fonctions financières du propriétaire.</p>
+                <form id="userInvitationForm" class="accounting-form">
+                    <label class="form-group">
+                        <span class="form-label">Nom complet</span>
+                        <input class="form-input" name="fullName" required minlength="2" maxlength="120" autocomplete="name">
+                    </label>
+                    <label class="form-group">
+                        <span class="form-label">Adresse e-mail</span>
+                        <input class="form-input" name="email" type="email" required maxlength="254" autocomplete="email">
+                    </label>
+                    <label class="form-group">
+                        <span class="form-label">Rôle</span>
+                        <select class="form-select" name="role" required>
+                            <option value="hotel_manager">Gérant hôtel</option>
+                            <option value="bar_manager">Gérant bar</option>
+                        </select>
+                    </label>
+                    <button class="btn btn-primary" type="submit">Envoyer l’invitation</button>
+                </form>
+                <p id="userInvitationStatus" class="user-administration-status" role="status" aria-live="polite"></p>
+            </section>
             <!-- Permission notice for owner -->
             <div class="permission-denied" id="ownerNotice" style="display: none;">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -84,8 +108,191 @@
                     des chambres. Les actions de création et validation sont réservées au personnel.</p>
             </div>
 
-            <!-- Stats Cards -->
-            <div class="stats-grid" id="statsGrid" style="margin-bottom: 30px;"></div>
+            <!-- Role-specific dashboard summary -->
+            <section class="dashboard-overview" aria-labelledby="dashboardOverviewTitle">
+                <div class="dashboard-overview__heading">
+                    <div>
+                        <span class="eyebrow">Vue d'ensemble</span>
+                        <h2 id="dashboardOverviewTitle">Indicateurs clés</h2>
+                    </div>
+                    <p id="dashboardOverviewNote"></p>
+                </div>
+                <div class="stats-grid" id="statsGrid"></div>
+            </section>
+
+            <section class="table-container owner-room-snapshot" id="ownerRoomSnapshot" aria-labelledby="ownerRoomTitle" hidden>
+                <div class="table-header">
+                    <h3 id="ownerRoomTitle">Parc des chambres</h3>
+                    <span class="badge badge-neutral" id="ownerRoomCount"></span>
+                </div>
+                <div class="owner-room-grid" id="ownerRoomGrid"></div>
+            </section>
+
+            <section class="accounting-section" id="accountingSection" aria-labelledby="accountingTitle">
+                <div class="accounting-heading">
+                    <div>
+                        <span class="eyebrow">Suivi financier</span>
+                        <h2 id="accountingTitle">Comptabilité et clôtures</h2>
+                    </div>
+                    <p id="accountingRoleNote">Les écritures sont horodatées et conservées dans le registre central.</p>
+                </div>
+
+                <div class="accounting-owner-tools" id="openingBalancePanel" hidden>
+                    <h3>Fonds initiaux des caisses</h3>
+                    <p>À configurer une seule fois avant la première clôture. Une correction ultérieure doit être passée au registre.</p>
+                    <form id="openingBalanceForm" class="accounting-form accounting-form--opening">
+                        <label class="form-group">
+                            <span class="form-label">Gérant</span>
+                            <select class="form-select" name="cashierId" id="openingCashier" required></select>
+                        </label>
+                        <label class="form-group">
+                            <span class="form-label">Service</span>
+                            <select class="form-select" name="department" required>
+                                <option value="hotel">Hôtel</option>
+                                <option value="bar">Bar</option>
+                            </select>
+                        </label>
+                        <label class="form-group">
+                            <span class="form-label">Moyen</span>
+                            <select class="form-select" name="paymentMethod" required>
+                                <option value="cash">Espèces</option>
+                                <option value="mobile_money">Mobile money</option>
+                            </select>
+                        </label>
+                        <label class="form-group">
+                            <span class="form-label">Solde initial (FCFA)</span>
+                            <input class="form-input" name="amount" type="number" min="0" step="1" required>
+                        </label>
+                        <label class="form-group accounting-form__wide">
+                            <span class="form-label">Motif / référence de comptage</span>
+                            <input class="form-input" name="reason" required minlength="5" maxlength="500">
+                        </label>
+                        <button class="btn btn-primary" type="submit">Enregistrer le fonds initial</button>
+                    </form>
+                </div>
+
+                <div class="accounting-workspace" id="managerAccountingPanel">
+                    <section class="accounting-panel" id="accountingEntryPanel">
+                        <h3>Nouvelle écriture</h3>
+                        <p>Enregistrez uniquement les sommes réellement reçues ou dépensées.</p>
+                        <form id="accountingEntryForm" class="accounting-form">
+                            <label class="form-group">
+                                <span class="form-label">Service</span>
+                                <select class="form-select" name="department" required>
+                                    <option value="hotel">Hôtel</option>
+                                    <option value="bar">Bar</option>
+                                </select>
+                            </label>
+                            <label class="form-group">
+                                <span class="form-label">Opération</span>
+                                <select class="form-select" name="entryType" required>
+                                    <option value="room_payment">Règlement chambre</option>
+                                    <option value="bar_sale">Vente du bar</option>
+                                    <option value="expense">Dépense (justificatif requis)</option>
+                                    <option value="cash_deposit">Dépôt de caisse</option>
+                                    <option value="cash_withdrawal">Retrait de caisse</option>
+                                </select>
+                            </label>
+                            <label class="form-group">
+                                <span class="form-label">Moyen</span>
+                                <select class="form-select" name="paymentMethod" required>
+                                    <option value="cash">Espèces</option>
+                                    <option value="mobile_money">Mobile money</option>
+                                </select>
+                            </label>
+                            <label class="form-group">
+                                <span class="form-label">Montant (FCFA)</span>
+                                <input class="form-input" name="amount" type="number" min="1" step="1" required>
+                            </label>
+                            <label class="form-group accounting-form__wide">
+                                <span class="form-label">Libellé</span>
+                                <input class="form-input" name="description" required minlength="3" maxlength="500">
+                            </label>
+                            <label class="form-group">
+                                <span class="form-label">Référence (client, séjour, commande, reçu)</span>
+                                <input class="form-input" name="reference" maxlength="120">
+                            </label>
+                            <label class="form-group" id="accountingPaymentReferenceField" hidden>
+                                <span class="form-label">Référence mobile money (facultative)</span>
+                                <input class="form-input" name="paymentReference" maxlength="120">
+                            </label>
+                            <label class="form-group" id="accountingReceiptField" hidden>
+                                <span class="form-label">Justificatif (PDF ou image, 10 Mo max) *</span>
+                                <input class="form-input" name="receipt" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
+                            </label>
+                            <button class="btn btn-primary accounting-form__wide" type="submit">Enregistrer dans le registre</button>
+                        </form>
+                    </section>
+
+                    <section class="accounting-panel" id="cashClosurePanel">
+                        <h3>Clôture quotidienne</h3>
+                        <p>Comparez le solde calculé aux espèces comptées et au solde mobile money constaté.</p>
+                        <form id="cashClosureForm" class="accounting-form">
+                            <label class="form-group accounting-form__wide">
+                                <span class="form-label">Service à clôturer</span>
+                                <select class="form-select" name="department" required>
+                                    <option value="hotel">Hôtel</option>
+                                    <option value="bar">Bar</option>
+                                </select>
+                            </label>
+                            <div class="accounting-balance-preview accounting-form__wide" id="cashBalancePreview" aria-live="polite">
+                                Solde attendu : sélectionnez un service.
+                            </div>
+                            <label class="form-group">
+                                <span class="form-label">Espèces comptées (FCFA)</span>
+                                <input class="form-input" name="countedCash" type="number" min="0" step="1" required>
+                            </label>
+                            <label class="form-group">
+                                <span class="form-label">Mobile money constaté (FCFA)</span>
+                                <input class="form-input" name="countedMobile" type="number" min="0" step="1" required>
+                            </label>
+                            <label class="form-group accounting-form__wide">
+                                <span class="form-label">Explication d’écart (obligatoire si différent du calcul)</span>
+                                <textarea class="form-input" name="varianceReason" rows="2" maxlength="1000"></textarea>
+                            </label>
+                            <button class="btn btn-primary accounting-form__wide" type="submit">Soumettre au propriétaire</button>
+                        </form>
+                        <div class="accounting-closures" id="managerClosureHistory"></div>
+                    </section>
+                </div>
+
+                <section class="accounting-panel accounting-approvals" id="closureApprovalPanel" hidden>
+                    <h3>Clôtures à vérifier</h3>
+                    <div class="accounting-approval-list" id="closureApprovalList"></div>
+                    <div class="accounting-closure-history">
+                        <h4>Historique des clôtures</h4>
+                        <div id="ownerClosureHistory"></div>
+                    </div>
+                </section>
+
+                <section class="accounting-panel accounting-ledger-panel">
+                    <div class="accounting-ledger-heading">
+                        <div>
+                            <h3>Journal des écritures</h3>
+                            <p>Les 100 écritures les plus récentes. Les écritures ne peuvent pas être modifiées ni supprimées.</p>
+                        </div>
+                        <button class="btn btn-secondary" type="button" id="accountingRefreshButton">Actualiser</button>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date / heure</th>
+                                    <th>Service</th>
+                                    <th>Opération</th>
+                                    <th>Libellé / référence</th>
+                                    <th>Moyen</th>
+                                    <th>Montant</th>
+                                    <th>Caisse / gérant</th>
+                                    <th>Justificatif</th>
+                                    <th>Correction</th>
+                                </tr>
+                            </thead>
+                            <tbody id="accountingLedgerTable"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </section>
 
             <!-- Tables Grid -->
             <div class="admin-tables">
@@ -102,7 +309,17 @@
                             </svg>
                             Demandes et réservations
                         </h3>
-                        <span class="badge badge-warning" id="pendingReservationsCount">0 à confirmer</span>
+                        <div class="reservation-header-actions">
+                            <span class="badge badge-warning" id="pendingReservationsCount">0 à confirmer</span>
+                            <button class="btn reservation-action reservation-action--new" id="walkInButton" type="button"
+                                onclick="openWalkInModal()">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.7" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5" />
+                                </svg>
+                                Nouvelle arrivée
+                            </button>
+                        </div>
                     </div>
                     <table>
                         <thead>
@@ -148,7 +365,7 @@
             </div>
 
             <!-- Rooms Status -->
-            <div class="table-container" style="margin-bottom: 24px;">
+            <div class="table-container" id="roomStatusSection" style="margin-bottom: 24px;">
                 <div class="table-header">
                     <h3>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -214,6 +431,7 @@
                         </svg>
                         Historique des Actions
                     </h3>
+                    <span class="badge badge-neutral" id="activityCount">0 action</span>
                 </div>
                 <table>
                     <thead>
@@ -230,6 +448,69 @@
         </div>
     </main>
 
+    <div class="modal-overlay" id="walkInModal" role="presentation" onclick="if (event.target === this) closeWalkInModal()">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="walkInTitle">
+            <div class="modal-header">
+                <h3 id="walkInTitle">Attribuer une chambre</h3>
+                <button class="cart-close" type="button" onclick="closeWalkInModal()" aria-label="Fermer">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" width="22" height="22">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="walkInForm" onsubmit="submitWalkIn(event)">
+                <div class="modal-body">
+                    <p class="walk-in-intro">Enregistrez le client présent et attribuez-lui une chambre disponible dès aujourd’hui.</p>
+                    <div class="form-group">
+                        <label class="form-label" for="walkInGuestName">Nom complet *</label>
+                        <input class="form-input" id="walkInGuestName" name="guestName" autocomplete="name" required maxlength="120">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="walkInGuestPhone">Téléphone *</label>
+                        <input class="form-input" id="walkInGuestPhone" name="guestPhone" type="tel" autocomplete="tel" required maxlength="40">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="walkInRoom">Chambre disponible *</label>
+                        <select class="form-select" id="walkInRoom" name="roomId" required>
+                            <option value="">Choisir une chambre</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="walkInCheckIn">Arrivée</label>
+                            <input class="form-input" id="walkInCheckIn" type="date" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="walkInCheckOut">Départ prévu *</label>
+                            <input class="form-input" id="walkInCheckOut" name="checkOut" type="date" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="walkInGuests">Nombre de personnes *</label>
+                        <select class="form-select" id="walkInGuests" name="guests" required>
+                            <option value="1">1 personne</option>
+                            <option value="2">2 personnes</option>
+                            <option value="3">3 personnes</option>
+                            <option value="4">4 personnes</option>
+                            <option value="5">5 personnes</option>
+                            <option value="6">6 personnes</option>
+                        </select>
+                    </div>
+                    <div class="reservation-total" id="walkInEstimate" hidden>
+                        <p class="reservation-summary-label">Estimation du séjour</p>
+                        <p class="reservation-total-price"><span id="walkInTotal">0 FCFA</span></p>
+                        <p class="reservation-total-nights">(<span id="walkInNights">0</span> nuit(s))</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeWalkInModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary" id="walkInSubmit">Attribuer la chambre</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <footer class="footer">
         <div class="container">
             <div class="footer-bottom">
@@ -240,9 +521,13 @@
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
     <script src="js/dialogs.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/accounting.js"></script>
+    <script src="js/user-admin.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/navigation.js"></script>
 </body>
