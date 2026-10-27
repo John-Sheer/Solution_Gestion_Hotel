@@ -170,9 +170,10 @@ function renderOwnerRoomSnapshot() {
     const reservations = getReservations();
     const today = getLocalDateString(new Date());
     const grid = document.getElementById('ownerRoomGrid');
+    const statsEl = document.getElementById('ownerRoomStats');
     document.getElementById('ownerRoomCount').textContent = `${rooms.length} chambres`;
 
-    grid.innerHTML = rooms.map(room => {
+    const roomStates = rooms.map(room => {
         const currentReservation = reservations.find(reservation =>
             reservation.roomId === room.id &&
             ['requested', 'active', 'checked_in'].includes(reservation.status) &&
@@ -182,13 +183,56 @@ function renderOwnerRoomSnapshot() {
             : currentReservation && currentReservation.status === 'checked_in' ? 'checked_in'
                 : room.status === 'occupied' ? 'occupied'
                     : currentReservation ? currentReservation.status : 'available';
+        return { room, currentReservation, status };
+    });
+
+    const total = rooms.length;
+    const libres = roomStates.filter(r => r.status === 'available').length;
+    const enSejour = roomStates.filter(r => r.status === 'checked_in').length;
+    const arriveesPrevues = roomStates.filter(r => r.status === 'active').length;
+    const demandes = roomStates.filter(r => r.status === 'requested').length;
+    const indisponibles = roomStates.filter(r => r.status === 'maintenance' || r.status === 'occupied').length;
+
+    if (statsEl) {
+        statsEl.innerHTML = `
+            <article class="owner-room-stat">
+                <span class="owner-room-stat__label">Total</span>
+                <strong class="owner-room-stat__value">${total}</strong>
+            </article>
+            <article class="owner-room-stat owner-room-stat--free">
+                <span class="owner-room-stat__label">Libres</span>
+                <strong class="owner-room-stat__value">${libres}</strong>
+            </article>
+            <article class="owner-room-stat owner-room-stat--stay">
+                <span class="owner-room-stat__label">En séjour</span>
+                <strong class="owner-room-stat__value">${enSejour}</strong>
+            </article>
+            <article class="owner-room-stat owner-room-stat--upcoming">
+                <span class="owner-room-stat__label">Arrivées prévues</span>
+                <strong class="owner-room-stat__value">${arriveesPrevues}</strong>
+            </article>
+            <article class="owner-room-stat owner-room-stat--pending">
+                <span class="owner-room-stat__label">Demandes</span>
+                <strong class="owner-room-stat__value">${demandes}</strong>
+            </article>
+            <article class="owner-room-stat owner-room-stat--blocked">
+                <span class="owner-room-stat__label">Indisponibles</span>
+                <strong class="owner-room-stat__value">${indisponibles}</strong>
+            </article>
+        `;
+    }
+
+    grid.innerHTML = roomStates.map(({ room, currentReservation, status }) => {
         const statusLabel = status === 'checked_in' ? 'En séjour'
             : status === 'requested' ? 'Demande en attente'
                 : status === 'active' ? 'Arrivée prévue'
-                    : getStatusLabel(status);
+                    : status === 'maintenance' ? 'En maintenance'
+                        : status === 'occupied' ? 'Occupée' : 'Libre';
         const statusClass = status === 'available' ? 'available'
-            : status === 'checked_in' || status === 'occupied' ? 'occupied'
-                : status === 'maintenance' ? 'maintenance' : 'reserved';
+            : status === 'checked_in' ? 'checked_in'
+                : status === 'active' ? 'upcoming'
+                    : status === 'requested' ? 'requested'
+                        : status === 'maintenance' ? 'maintenance' : 'occupied';
 
         return `
             <article class="owner-room-card owner-room-card--${statusClass}">
@@ -196,11 +240,8 @@ function renderOwnerRoomSnapshot() {
                     <strong>Chambre ${escapeHtml(room.number)}</strong>
                     <span class="owner-room-status">${escapeHtml(statusLabel)}</span>
                 </div>
-                <p>${escapeHtml(getTypeLabel(room.type))} · ${room.capacity} pers.</p>
-                <div class="owner-room-card__bottom">
-                    <span>${formatPrice(room.price)}<small> / nuit</small></span>
-                    ${currentReservation ? `<span class="owner-room-guest">${escapeHtml(currentReservation.guestName)}</span>` : ''}
-                </div>
+                <p>${escapeHtml(getTypeLabel(room.type))} · ${room.capacity} pers. · ${formatPrice(room.price)}<small> / nuit</small></p>
+                ${currentReservation ? `<div class="owner-room-card__guest"><span>Client</span><strong>${escapeHtml(currentReservation.guestName)}</strong><small>${formatShortDate(currentReservation.checkIn)} → ${formatShortDate(currentReservation.checkOut)}</small></div>` : '<div class="owner-room-card__guest owner-room-card__guest--empty"><span>Libre pour réservation</span></div>'}
             </article>
         `;
     }).join('');

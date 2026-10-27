@@ -580,3 +580,178 @@
     height: 400px;
   }
 }
+
+/* ============================================
+   Propriétaire - chambres en temps réel
+   ============================================ */
+
+.owner-room-snapshot__subtitle {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.owner-room-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  padding: 16px 20px 0;
+}
+
+.owner-room-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid rgba(10, 34, 55, 0.08);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px -24px rgba(10, 34, 55, 0.6);
+}
+
+.owner-room-stat__label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-secondary);
+}
+
+.owner-room-stat__value {
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  color: var(--brand-navy);
+}
+
+.owner-room-stat--free .owner-room-stat__value { color: #1f7a4d; }
+.owner-room-stat--stay .owner-room-stat__value { color: #1f5f8b; }
+.owner-room-stat--upcoming .owner-room-stat__value { color: #b08a4f; }
+.owner-room-stat--pending .owner-room-stat__value { color: #a86400; }
+.owner-room-stat--blocked .owner-room-stat__value { color: #b3362e; }
+
+.owner-room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  padding: 18px 20px 22px;
+}
+
+.owner-room-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid rgba(10, 34, 55, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 24px 50px -34px rgba(10, 34, 55, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.owner-room-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: rgba(10, 34, 55, 0.18);
+}
+
+.owner-room-card--available::before { background: #1f7a4d; }
+.owner-room-card--checked_in::before { background: #1f5f8b; }
+.owner-room-card--upcoming::before { background: #b08a4f; }
+.owner-room-card--requested::before { background: #a86400; }
+.owner-room-card--maintenance::before { background: #b3362e; }
+.owner-room-card--occupied::before { background: #b3362e; }
+
+.owner-room-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.owner-room-card__top strong {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  color: var(--brand-navy);
+}
+
+.owner-room-status {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: rgba(10, 34, 55, 0.06);
+  color: var(--text-secondary);
+}
+
+.owner-room-card--available .owner-room-status {
+  background: rgba(31, 122, 77, 0.12);
+  color: #1f7a4d;
+}
+
+.owner-room-card--checked_in .owner-room-status {
+  background: rgba(31, 95, 139, 0.12);
+  color: #1f5f8b;
+}
+
+.owner-room-card--upcoming .owner-room-status {
+  background: rgba(176, 138, 79, 0.16);
+  color: #8a6a3a;
+}
+
+.owner-room-card--requested .owner-room-status {
+  background: rgba(168, 100, 0, 0.14);
+  color: #a86400;
+}
+
+.owner-room-card--maintenance .owner-room-status,
+.owner-room-card--occupied .owner-room-status {
+  background: rgba(179, 54, 46, 0.12);
+  color: #b3362e;
+}
+
+.owner-room-card p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.owner-room-card__guest {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(10, 34, 55, 0.08);
+}
+
+.owner-room-card__guest span {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
+}
+
+.owner-room-card__guest strong {
+  font-weight: 600;
+  color: var(--brand-navy);
+}
+
+.owner-room-card__guest small {
+  color: var(--text-secondary);
+}
+
+.owner-room-card__guest--empty span {
+  color: rgba(10, 34, 55, 0.6);
+}
+
+@media (max-width: 768px) {
+  .owner-room-stats {
+    padding: 14px 16px 0;
+  }
+
+  .owner-room-grid {
+    padding: 16px;
+  }
+}
